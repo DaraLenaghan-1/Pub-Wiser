@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "22358758973",
+    "project_id": "loginpage-ad2ee",
+    "storage_bucket": "loginpage-ad2ee.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:22358758973:android:79de9e84cbe66f6095fc54",
+        "android_client_info": {
+          "package_name": "com.example.first_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCkj481-XiegZSd0U2vOVWjQiLgCc7sOAw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
