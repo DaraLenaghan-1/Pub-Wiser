@@ -36,4 +36,8 @@ class FirebaseAuthService {
 
     return null;
   }
+
+  Future<UserCredential> signInWithCredential(AuthCredential credential) async {
+    return await _auth.signInWithCredential(credential);
+  }
 }

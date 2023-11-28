@@ -27,6 +27,7 @@ environment:
 # dependencies can be manually updated by changing the version numbers below to
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
+
 dependencies:
   flutter:
     sdk: flutter
@@ -38,6 +39,8 @@ dependencies:
   cupertino_icons: ^1.0.2
   font_awesome_flutter: ^10.6.0
   google_sign_in: ^6.1.5
+  google_fonts: ^6.1.0
+
 # firebase_core: ^2.21.0
 # This is the core Firebase library. It is required to use any Firebase service in your Flutter application.
 # It provides the basic Firebase setup and initialization functionality.
@@ -70,6 +73,10 @@ dependencies:
 # This is a Flutter plugin for Google Sign-In. It allows you to authenticate users with Google.
 # It also provides a set of helper widgets that allow you to use the Google Sign-In functionality in your Flutter app.
 # It is required to use Google Sign-In in your Flutter app.
+
+# google_fonts: ^6.1.0
+# This is a Flutter plugin for Google Fonts. It allows you to use any of the 977 fonts from fonts.google.com in your Flutter app.
+# It also provides a set of helper widgets that allow you to use the Google Fonts in your Flutter app.
 
 dev_dependencies:
   flutter_test:

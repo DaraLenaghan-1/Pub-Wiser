@@ -26,6 +26,7 @@ class _HomePageState extends State<HomePage> {
               "Home Page",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19),
             )),
+            //logout button
             const SizedBox(
               height: 30,
             ),
@@ -51,7 +52,32 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
-            )
+            ),
+            //categories button
+            const SizedBox(height: 30),
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, "/categories");
+              },
+              child: Container(
+                height: 45,
+                width: 100,
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Center(
+                  child: Text(
+                    "Categories",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ],
         ));
   }
