@@ -1,5 +1,4 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:first_app/data/pub_data.dart';
 import 'package:first_app/features/app/splash_screen/splash_screen.dart';
 import 'package:first_app/features/user_auth/presentation/pages/login_page.dart';
 import 'package:flutter/foundation.dart';
@@ -7,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:first_app/features/user_auth/presentation/pages/home_page.dart';
 import 'package:first_app/features/app/pages/categories.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:first_app/features/app/pages/pubs_page.dart';
 
 final theme = ThemeData(
   useMaterial3: true,
@@ -16,7 +14,6 @@ final theme = ThemeData(
     seedColor: const Color.fromARGB(255, 131, 57, 0),
   ),
   textTheme: GoogleFonts.latoTextTheme(),
-
 );
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,12 +37,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter First App',
+      title: 'Pub Wiser',
       theme: ThemeData(useMaterial3: true),
-      home: const PubsPage(
-        title: 'Pubs',
-        pubs: pubData,
-        //child: LoginPage(),
+      home: const SplashScreen(
+        child: LoginPage(),
       ),
       routes: {
         '/home': (context) => const HomePage(),

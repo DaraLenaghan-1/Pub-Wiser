@@ -2,9 +2,12 @@ import 'package:first_app/models/category.dart';
 import 'package:flutter/material.dart';
 
 class CategoryGridItem extends StatelessWidget {
-  const CategoryGridItem({super.key, required this.category});
+  const CategoryGridItem(
+      {Key? key, required this.category, required this.onSelectCategory})
+      : super(key: key);
 
   final Category category;
+  final VoidCallback onSelectCategory;
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +15,7 @@ class CategoryGridItem extends StatelessWidget {
     //get visual feedback when the user taps the widget
     // GestureDetector does not provide any visual feedback when the user taps the widget
     return InkWell(
-      onTap: () {},
+      onTap: onSelectCategory,
       splashColor: Theme.of(context).primaryColor,
       borderRadius: BorderRadius.circular(16.0),
       child: Container(
@@ -37,8 +40,9 @@ class CategoryGridItem extends StatelessWidget {
           )),
     );
   }
+}
 
-  /*final String id;
+/*final String id;
   final String title;
   final Color color;
 
@@ -81,4 +85,4 @@ class CategoryGridItem extends StatelessWidget {
       ),
     );
   }*/
-}
+  

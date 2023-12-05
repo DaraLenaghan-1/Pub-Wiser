@@ -1,3 +1,4 @@
+import 'package:first_app/features/app/widgets/pub_item.dart';
 import 'package:first_app/models/pub.dart';
 import 'package:flutter/material.dart';
 
@@ -36,16 +37,14 @@ class PubsPage extends StatelessWidget {
     if (pubs.isNotEmpty) {
       content = ListView.builder(
         itemCount: pubs.length,
-        itemBuilder: (ctx, index) => Text(
-          pubs[index].title,
-        ),
+        itemBuilder: (ctx, index) => PubItem(pub: pubs[index]),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.blue,
       ),
       body: content,
     );

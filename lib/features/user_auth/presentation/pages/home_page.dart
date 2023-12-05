@@ -17,6 +17,7 @@ class _HomePageState extends State<HomePage> {
         appBar: AppBar(
           automaticallyImplyLeading: false,
           title: const Text("HomePage"),
+          backgroundColor: Colors.blue,
         ),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
