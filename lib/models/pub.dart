@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 enum Affordability {
   affordable,
   pricey,
@@ -39,6 +41,37 @@ class Pub {
     //required this.isPool,
   });
 
+// Factory constructor to create a Pub from a Firestore document.
+  factory Pub.fromFirestore(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+    return Pub(
+      id: doc.id,
+      categories: List<String>.from(data['categories']),
+      title: data['title'],
+      imageUrl: data['imageUrl'],
+      affordability: _mapStringToAffordability(data['affordability']),
+      isAccessible: data['isAccessible'] ?? false,
+      isLateNight: data['isLateNight'] ?? false,
+      // Map other properties similarly
+    );
+  }
+
+// Helper method to convert string to Affordability enum
+  static Affordability _mapStringToAffordability(String? str) {
+    switch (str) {
+      case 'pricey':
+        return Affordability.pricey;
+      case 'luxurious':
+        return Affordability.luxurious;
+      default:
+        return Affordability.affordable;
+    }
+  }
+
+  // Add similar methods for other enums if needed
+
+  // properties
   final String id;
   final List<String> categories;
   final String title;

@@ -1,11 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:first_app/features/app/splash_screen/splash_screen.dart';
-import 'package:first_app/features/user_auth/presentation/pages/login_page.dart';
+import 'package:first_app/features/user_auth/UI/pages/login_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:first_app/features/user_auth/presentation/pages/home_page.dart';
+import 'package:first_app/features/user_auth/UI/pages/home_page.dart';
 import 'package:first_app/features/app/pages/categories.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:first_app/data/firebase_store_implementation/firestore_pubData.dart';
+
 
 final theme = ThemeData(
   useMaterial3: true,

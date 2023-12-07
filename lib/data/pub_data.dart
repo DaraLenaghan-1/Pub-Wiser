@@ -53,6 +53,21 @@ const availableCategories = [
     title: 'Pool/Darts',
     color: Colors.teal,
   ),
+  cat.Category(
+    id: 'c11',
+    title: 'Live Music',
+    color: Colors.cyan,
+  ),
+  cat.Category(
+    id: 'c12',
+    title: 'Cocktails',
+    color: Colors.lightGreen,
+  ),
+  cat.Category(
+    id: 'c13',
+    title: 'Whiskey',
+    color: Colors.lightGreen,
+  ),
 ];
 
 const pubData = [
