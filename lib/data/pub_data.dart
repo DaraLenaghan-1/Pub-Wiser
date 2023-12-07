@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
 import 'package:first_app/models/category.dart' as cat;
 import 'package:first_app/models/pub.dart';
 
@@ -53,6 +53,7 @@ const availableCategories = [
     title: 'Pool/Darts',
     color: Colors.teal,
   ),
+  /*
   cat.Category(
     id: 'c11',
     title: 'Live Music',
@@ -67,7 +68,7 @@ const availableCategories = [
     id: 'c13',
     title: 'Whiskey',
     color: Colors.lightGreen,
-  ),
+  ),*/
 ];
 
 const pubData = [
@@ -167,7 +168,7 @@ const pubData = [
     isLateNight: false,
   ),
 ];
- 
+ */
  /*final String id;
   final String title;
   final Color color;

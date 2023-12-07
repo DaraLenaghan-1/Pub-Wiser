@@ -7,6 +7,7 @@ class PubItem extends StatelessWidget {
     super.key,
     required this.pub,
   });
+
   final Pub pub;
 
   @override
@@ -14,20 +15,20 @@ class PubItem extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.all(8.0),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0), //8
+        borderRadius: BorderRadius.circular(16.0),
       ),
       clipBehavior: Clip.hardEdge,
-      elevation: 8.0, //add shadow
+      elevation: 8.0,
       child: InkWell(
-        onTap: () {},
+        onTap: () {
+          // TODO: Implement onTap functionality, e.g., navigate to a detailed pub page
+        },
         child: Stack(
-          //Stack is a widget that allows you to stack multiple widgets on top of each other, by default, they are placed on top of each other in the order they are added to the stack
           children: [
             FadeInImage(
               placeholder: MemoryImage(kTransparentImage),
               image: NetworkImage(pub.imageUrl),
-              fit: BoxFit
-                  .cover, //cover the entire card with the image (no white space)
+              fit: BoxFit.cover,
               height: 200,
               width: double.infinity,
             ),
@@ -39,52 +40,48 @@ class PubItem extends StatelessWidget {
                 width: MediaQuery.of(context).size.width,
                 color: Colors.black54,
                 padding: const EdgeInsets.symmetric(
-                    vertical: 8.0, horizontal: 16.0), // 6, 44
+                  vertical: 8.0,
+                  horizontal: 16.0,
+                ),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       pub.title,
                       maxLines: 2,
-                      textAlign: TextAlign.center,
-                      softWrap: true,
-                      overflow: TextOverflow.ellipsis, //very long text
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
-                    const SizedBox(
-                      height: 12.0,
-                    ),
+                    const SizedBox(height: 8.0),
                     Row(
                       children: [
-                        const Icon(
-                          Icons.accessible,
+                        Icon(
+                          pub.isAccessible ? Icons.accessible : Icons.accessibility_new,
                           color: Colors.white,
+                          size: 16.0,
                         ),
-                        const SizedBox(
-                          width: 6.0,
-                        ),
+                        const SizedBox(width: 8.0),
                         Text(
                           pub.isAccessible ? 'Accessible' : 'Not Accessible',
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(color: Colors.white, fontSize: 14),
                         ),
-                        const SizedBox(
-                          width: 12.0,
-                        ),
-                        const Icon(
-                          Icons.nightlife,
+                        const SizedBox(width: 16.0),
+                        Icon(
+                          pub.isLateNight ? Icons.nightlife : Icons.bedtime,
                           color: Colors.white,
+                          size: 16.0,
                         ),
-                        const SizedBox(
-                          width: 6.0,
-                        ),
+                        const SizedBox(width: 8.0),
                         Text(
-                          pub.isLateNight ? 'Late Night' : 'Not Late Night',
-                          style: const TextStyle(color: Colors.white),
+                          pub.isLateNight ? 'Late Night' : 'Closes Early',
+                          style: const TextStyle(color: Colors.white, fontSize: 14),
                         ),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),
