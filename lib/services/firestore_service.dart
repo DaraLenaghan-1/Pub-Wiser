@@ -19,7 +19,7 @@ class FirestoreService {
 
   Future<List<Pub>> getPubs(String categoryId) async {
     QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('pubs')
+        .collection('pubData')
         .where('categories', arrayContains: categoryId)
         .get();
 

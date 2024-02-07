@@ -1,3 +1,4 @@
+import 'package:first_app/features/app/widgets/pub_item_trait.dart';
 import 'package:flutter/material.dart';
 import 'package:first_app/models/pub.dart';
 import 'package:transparent_image/transparent_image.dart';
@@ -58,6 +59,9 @@ class PubItem extends StatelessWidget {
                     ),
                     const SizedBox(height: 8.0),
                     Row(
+                      /*children: [
+                        //PubItemTrait(icon: Icons.accessibility_new, label: label)
+                      ],*/
                       children: [
                         Icon(
                           pub.isAccessible ? Icons.accessible : Icons.accessibility_new,

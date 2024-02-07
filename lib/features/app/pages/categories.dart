@@ -40,7 +40,7 @@ class CategoriesScreen extends StatelessWidget {
                       // Fetch pubs for the selected category
                       List<Pub> pubs =
                           await FirestoreService().getPubs(category.id);
-
+                          
                       // Navigate to the PubsPage with the fetched pubs and category title
                       Navigator.of(context).push(
                         MaterialPageRoute(
