@@ -1,12 +1,23 @@
 import 'package:first_app/features/app/widgets/pub_item.dart';
 import 'package:first_app/models/pub.dart';
 import 'package:flutter/material.dart';
+import 'package:first_app/features/app/pages/pub_details.dart';
+
 
 class PubsPage extends StatelessWidget {
   const PubsPage({super.key, required this.title, required this.pubs});
 
   final String title;
   final List<Pub> pubs;
+
+  void selectPub(BuildContext context, Pub pub) {
+    // Navigate to the PubDetailsPage with the selected pub
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (ctx) => PubDetailsPage(pub: pub),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +48,9 @@ class PubsPage extends StatelessWidget {
     if (pubs.isNotEmpty) {
       content = ListView.builder(
         itemCount: pubs.length,
-        itemBuilder: (ctx, index) => PubItem(pub: pubs[index]),
+        itemBuilder: (ctx, index) => PubItem(pub: pubs[index], onSelectPub: (pub){
+          selectPub(context, pub);
+        },),
       );
     }
 

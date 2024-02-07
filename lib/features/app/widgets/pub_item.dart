@@ -7,9 +7,11 @@ class PubItem extends StatelessWidget {
   const PubItem({
     super.key,
     required this.pub,
+    required this.onSelectPub,
   });
 
   final Pub pub;
+  final void Function(BuildContext context, Pub pub) onSelectPub;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +24,7 @@ class PubItem extends StatelessWidget {
       elevation: 8.0,
       child: InkWell(
         onTap: () {
-          // TODO: Implement onTap functionality, e.g., navigate to a detailed pub page
+          onSelectPub(pub); //pub is passed to the onSelectPub function
         },
         child: Stack(
           children: [
@@ -58,7 +60,7 @@ class PubItem extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8.0),
-                    Row(
+                    Row( //qucik pub info
                       /*children: [
                         //PubItemTrait(icon: Icons.accessibility_new, label: label)
                       ],*/
