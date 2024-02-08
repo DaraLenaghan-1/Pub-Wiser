@@ -19,6 +19,7 @@ class Pub {
     required this.title,
     required this.imageUrl,
     required this.affordability,
+    required this.description,
     //required this.mood,
     required this.isAccessible,
     //required this.isTwentyOnes,
@@ -53,6 +54,7 @@ class Pub {
       affordability: _mapStringToAffordability(data['affordability']),
       isAccessible: data['isAccessible'] ?? false,
       isLateNight: data['isLateNight'] ?? false,
+      description: data['description'],
       // Map other properties similarly
     );
   }
@@ -77,6 +79,7 @@ class Pub {
   final String title;
   final String imageUrl;
   final Affordability affordability;
+  final String description;
   //final Mood mood;
   final bool isAccessible;
   //final bool isTwentyOnes;
