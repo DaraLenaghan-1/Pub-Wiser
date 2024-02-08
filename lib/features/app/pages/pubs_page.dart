@@ -49,8 +49,10 @@ class PubsPage extends StatelessWidget {
         itemCount: pubs.length,
         itemBuilder: (ctx, index) => PubItem(
           pub: pubs[index],
-          onSelectPub: () =>
-              selectPub(context, pubs[index]), // Correction needed here
+          onSelectPub: (ctx, selectedPub) {
+            // This assumes onSelectPub expects a function with two parameters.
+            selectPub(ctx, selectedPub);
+          },
         ),
       );
     }
