@@ -196,7 +196,7 @@ class _LoginPageState extends State<LoginPage> {
 
     if (user != null) {
       showToast(message: 'Successfuly logged in');                                                                                                                                                                                                
-      Navigator.pushNamed(context, "/home");
+      Navigator.pushNamed(context, "/tabs");
     } else {
       showToast(message: 'Login failed');
     }

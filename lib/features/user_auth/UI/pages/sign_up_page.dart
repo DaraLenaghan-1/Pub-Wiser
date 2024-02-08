@@ -172,7 +172,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
     if (user != null) {
       showToast(message: 'Sign up successful');
-      Navigator.pushNamed(context, "/home");
+      Navigator.pushNamed(context, "/tabs");
     } else {
       showToast(message: 'Sign up failed');
     }

@@ -1,5 +1,6 @@
 import 'package:first_app/features/app/pages/categories.dart';
 import 'package:first_app/features/app/pages/pubs_page.dart';
+import 'package:first_app/features/user_auth/UI/pages/home_page.dart';
 import 'package:flutter/material.dart';
 
 class TabsPage extends StatefulWidget {
@@ -12,7 +13,7 @@ class TabsPage extends StatefulWidget {
 }
 
 class _TabsScreenState extends State<TabsPage> {
-  int _selectedPageIndex = 0; // 0 for categories, 1 for favourites
+  int _selectedPageIndex = 0; // 0 for home 1 for categories, 2 for favourites
 
   void _selectPage(int index) {
     setState(() {
@@ -22,11 +23,15 @@ class _TabsScreenState extends State<TabsPage> {
 
   @override
   Widget build(BuildContext context) {
-    Widget activePage = const CategoriesScreen();
-    var activePageTitle = 'Categories';
+    Widget activePage = const HomePage();
+    var activePageTitle = 'Home';
 
     if (_selectedPageIndex == 1) {
-      activePage = PubsPage(title: 'Favourites', pubs: []);
+      activePage = const CategoriesScreen();
+      activePageTitle = 'Categories';
+    } else
+    if (_selectedPageIndex == 2) {
+      activePage = const PubsPage(title: 'Favourites', pubs: []);
       activePageTitle = 'Your Favourites';
     }
 
@@ -38,6 +43,7 @@ class _TabsScreenState extends State<TabsPage> {
     bottomNavigationBar: BottomNavigationBar(
       onTap: _selectPage,
       items: const [
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
         BottomNavigationBarItem(icon: Icon(Icons.local_bar), label: 'Categories'),
         BottomNavigationBarItem(icon: Icon(Icons.star), label: 'Favourites'),
         ],
