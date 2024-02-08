@@ -29,23 +29,24 @@ class _TabsScreenState extends State<TabsPage> {
     if (_selectedPageIndex == 1) {
       activePage = const CategoriesScreen();
       activePageTitle = 'Categories';
-    } else
-    if (_selectedPageIndex == 2) {
-      activePage = const PubsPage(title: 'Favourites', pubs: []);
+    } else if (_selectedPageIndex == 2) {
+      activePage = const PubsPage(pubs: []);
       activePageTitle = 'Your Favourites';
     }
 
     return Scaffold(
       appBar: AppBar(
         title: Text(activePageTitle),
-    ),
-    body: activePage,
-    bottomNavigationBar: BottomNavigationBar(
-      onTap: _selectPage,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.local_bar), label: 'Categories'),
-        BottomNavigationBarItem(icon: Icon(Icons.star), label: 'Favourites'),
+      ),
+      body: activePage,
+      bottomNavigationBar: BottomNavigationBar(
+        onTap: _selectPage,
+        currentIndex: _selectedPageIndex,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.local_bar), label: 'Categories'),
+          BottomNavigationBarItem(icon: Icon(Icons.star), label: 'Favourites'),
         ],
       ),
     );

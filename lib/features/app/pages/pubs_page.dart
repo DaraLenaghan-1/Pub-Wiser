@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:first_app/features/app/pages/pub_details.dart';
 
 class PubsPage extends StatelessWidget {
-  const PubsPage({super.key, required this.title, required this.pubs});
+  const PubsPage({super.key, this.title, required this.pubs});
 
-  final String title;
+  final String? title;
   final List<Pub> pubs;
 
   void selectPub(BuildContext context, Pub pub) {
@@ -57,9 +57,13 @@ class PubsPage extends StatelessWidget {
       );
     }
 
+    if (title == null){
+      return content;
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text(title!),
         backgroundColor: Colors.blue,
       ),
       body: content,
