@@ -5,13 +5,13 @@ import 'package:transparent_image/transparent_image.dart';
 
 class PubItem extends StatelessWidget {
   const PubItem({
-    super.key,
+    Key? key,
     required this.pub,
     required this.onSelectPub,
-  });
+  }) : super(key: key);
 
   final Pub pub;
-  final void Function(BuildContext context, Pub pub) onSelectPub;
+  final Function(BuildContext context, Pub) onSelectPub;
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +23,7 @@ class PubItem extends StatelessWidget {
       clipBehavior: Clip.hardEdge,
       elevation: 8.0,
       child: InkWell(
-        onTap: () {
-          onSelectPub(pub); //pub is passed to the onSelectPub function
-        },
+        onTap: () => onSelectPub(context, pub),
         child: Stack(
           children: [
             FadeInImage(
@@ -60,20 +58,24 @@ class PubItem extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8.0),
-                    Row( //qucik pub info
+                    Row(
+                      //qucik pub info
                       /*children: [
                         //PubItemTrait(icon: Icons.accessibility_new, label: label)
                       ],*/
                       children: [
                         Icon(
-                          pub.isAccessible ? Icons.accessible : Icons.accessibility_new,
+                          pub.isAccessible
+                              ? Icons.accessible
+                              : Icons.accessibility_new,
                           color: Colors.white,
                           size: 16.0,
                         ),
                         const SizedBox(width: 8.0),
                         Text(
                           pub.isAccessible ? 'Accessible' : 'Not Accessible',
-                          style: const TextStyle(color: Colors.white, fontSize: 14),
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 14),
                         ),
                         const SizedBox(width: 16.0),
                         Icon(
@@ -84,7 +86,8 @@ class PubItem extends StatelessWidget {
                         const SizedBox(width: 8.0),
                         Text(
                           pub.isLateNight ? 'Late Night' : 'Closes Early',
-                          style: const TextStyle(color: Colors.white, fontSize: 14),
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 14),
                         ),
                       ],
                     ),

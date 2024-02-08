@@ -3,7 +3,6 @@ import 'package:first_app/models/pub.dart';
 import 'package:flutter/material.dart';
 import 'package:first_app/features/app/pages/pub_details.dart';
 
-
 class PubsPage extends StatelessWidget {
   const PubsPage({super.key, required this.title, required this.pubs});
 
@@ -48,9 +47,11 @@ class PubsPage extends StatelessWidget {
     if (pubs.isNotEmpty) {
       content = ListView.builder(
         itemCount: pubs.length,
-        itemBuilder: (ctx, index) => PubItem(pub: pubs[index], onSelectPub: (pub){
-          selectPub(context, pub);
-        },),
+        itemBuilder: (ctx, index) => PubItem(
+          pub: pubs[index],
+          onSelectPub: () =>
+              selectPub(context, pubs[index]), // Correction needed here
+        ),
       );
     }
 
