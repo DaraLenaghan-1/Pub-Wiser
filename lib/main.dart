@@ -47,7 +47,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/home': (context) => const HomePage(),
         '/login': (context) => const LoginPage(),
-        '/categories': (context) => const CategoriesScreen(),
+        '/categories': (context) =>
+            CategoriesScreen(onToggleFavourite: (pub) {}),
         '/tabs': (context) => const TabsPage(),
       },
     );

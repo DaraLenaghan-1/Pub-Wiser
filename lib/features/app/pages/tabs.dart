@@ -46,7 +46,7 @@ class _TabsScreenState extends State<TabsPage> {
       activePageTitle = 'Categories';
     } else if (_selectedPageIndex == 2) {
       activePage = PubsPage(
-        pubs: [],
+        pubs: _favouritePubs,
         onToggleFavourite: _toggleMealFavourite,
       );
       activePageTitle = 'Your Favourites';
