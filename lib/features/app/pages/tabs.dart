@@ -18,15 +18,32 @@ class _TabsScreenState extends State<TabsPage> {
   int _selectedPageIndex = 0; // 0 for home 1 for categories, 2 for favourites
   final List<Pub> _favouritePubs = [];
 
+  void _showInfoMessage(String message) {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   // Define a function to toggle a pub in the favourite pubs list
   void _toggleMealFavourite(Pub pub) {
     final isExisting = _favouritePubs
         .contains(pub); //Check if the pub is already in the favourite pubs list
     if (isExisting) {
-      // If the pub is in the list, remove it from the list
-      _favouritePubs.remove(pub);
+      setState(() {
+        // If the pub is in the list, remove it from the list
+        _favouritePubs.remove(pub);
+      });
+      _showInfoMessage('Removed from favourites');
     } else {
-      _favouritePubs.add(pub); // Add the pub to the list
+      setState(() {
+        // If the pub is not in the list, add it to the list
+        _favouritePubs.add(pub);
+        _showInfoMessage('Added to favourites');
+      });
     }
   }
 
