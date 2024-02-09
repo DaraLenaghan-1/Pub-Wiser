@@ -1,6 +1,8 @@
 import 'package:first_app/features/app/pages/categories.dart';
 import 'package:first_app/features/app/pages/pubs_page.dart';
 import 'package:first_app/features/user_auth/UI/pages/home_page.dart';
+import 'package:first_app/models/pub.dart';
+
 import 'package:flutter/material.dart';
 
 class TabsPage extends StatefulWidget {
@@ -14,6 +16,19 @@ class TabsPage extends StatefulWidget {
 
 class _TabsScreenState extends State<TabsPage> {
   int _selectedPageIndex = 0; // 0 for home 1 for categories, 2 for favourites
+  final List<Pub> _favouritePubs = [];
+
+  // Define a function to toggle a pub in the favourite pubs list
+  void _toggleMealFavourite(Pub pub) {
+    final isExisting = _favouritePubs
+        .contains(pub); //Check if the pub is already in the favourite pubs list
+    if (isExisting) {
+      // If the pub is in the list, remove it from the list
+      _favouritePubs.remove(pub);
+    } else {
+      _favouritePubs.add(pub); // Add the pub to the list
+    }
+  }
 
   void _selectPage(int index) {
     setState(() {
@@ -27,10 +42,13 @@ class _TabsScreenState extends State<TabsPage> {
     var activePageTitle = 'Home';
 
     if (_selectedPageIndex == 1) {
-      activePage = const CategoriesScreen();
+      activePage = CategoriesScreen(onToggleFavourite: _toggleMealFavourite);
       activePageTitle = 'Categories';
     } else if (_selectedPageIndex == 2) {
-      activePage = const PubsPage(pubs: []);
+      activePage = PubsPage(
+        pubs: [],
+        onToggleFavourite: _toggleMealFavourite,
+      );
       activePageTitle = 'Your Favourites';
     }
 

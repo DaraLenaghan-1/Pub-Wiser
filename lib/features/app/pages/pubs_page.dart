@@ -4,16 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:first_app/features/app/pages/pub_details.dart';
 
 class PubsPage extends StatelessWidget {
-  const PubsPage({super.key, this.title, required this.pubs});
+  const PubsPage({super.key, this.title, required this.pubs, required this.onToggleFavourite});
 
   final String? title;
   final List<Pub> pubs;
+  final void Function(Pub pub) onToggleFavourite;
 
   void selectPub(BuildContext context, Pub pub) {
     // Navigate to the PubDetailsPage with the selected pub
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (ctx) => PubDetailsPage(pub: pub),
+        builder: (ctx) => PubDetailsPage(pub: pub, onToggleFavourite: onToggleFavourite),
       ),
     );
   }

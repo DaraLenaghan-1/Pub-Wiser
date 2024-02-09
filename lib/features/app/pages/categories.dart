@@ -6,7 +6,9 @@ import 'package:first_app/features/app/pages/pubs_page.dart';
 import 'package:first_app/models/pub.dart';
 
 class CategoriesScreen extends StatelessWidget {
-  const CategoriesScreen({super.key});
+  const CategoriesScreen({super.key, required.onToggleFavourite});
+
+  final void Function(Pub pub) onToggleFavourite
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +35,7 @@ class CategoriesScreen extends StatelessWidget {
                   category: category,
                   onSelectCategory: () async {
                     // Fetch pubs for the selected category
-                    List<Pub> pubs =
+                    List<Pub> filteredPubs =
                         await FirestoreService().getPubs(category.id);
 
                     // Navigate to the PubsPage with the fetched pubs and category title
@@ -41,7 +43,8 @@ class CategoriesScreen extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (context) => PubsPage(
                           title: category.title,
-                          pubs: pubs,
+                          pubs: filteredPubs,
+                          onToggleFavourite: onToggleFavourite,
                         ),
                       ),
                     );
