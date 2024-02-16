@@ -1,5 +1,7 @@
 import 'package:first_app/features/app/pages/categories.dart';
+import 'package:first_app/features/app/pages/filters.dart';
 import 'package:first_app/features/app/pages/pubs_page.dart';
+import 'package:first_app/features/app/widgets/main_drawer.dart';
 import 'package:first_app/features/user_auth/UI/pages/home_page.dart';
 import 'package:first_app/models/pub.dart';
 
@@ -53,6 +55,19 @@ class _TabsScreenState extends State<TabsPage> {
     });
   }
 
+  void _setPage(String identifier) {
+    Navigator.of(context).pop(); // Close the drawer
+    if (identifier == 'filters') {
+      Navigator.of(context).push( //pushReplacement - replaces the current page instead of pushing a new page
+        MaterialPageRoute(
+          builder: (ctx) => const FiltersPage(),
+        ),
+      );
+    } else {
+      Navigator.of(context).pop(); // Close the drawer
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget activePage = const HomePage();
@@ -73,7 +88,11 @@ class _TabsScreenState extends State<TabsPage> {
       appBar: AppBar(
         title: Text(activePageTitle),
       ),
+      drawer: MainDrawer(
+        onSelectPage: _setPage,
+      ),
       body: activePage,
+      // Define the bottom navigation bar with the tabs,
       bottomNavigationBar: BottomNavigationBar(
         onTap: _selectPage,
         currentIndex: _selectedPageIndex,
