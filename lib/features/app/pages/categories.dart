@@ -6,9 +6,10 @@ import 'package:first_app/features/app/pages/pubs_page.dart';
 import 'package:first_app/models/pub.dart';
 
 class CategoriesScreen extends StatelessWidget {
-  const CategoriesScreen({super.key, required this.onToggleFavourite});
+  const CategoriesScreen({super.key, required this.onToggleFavourite, required this.availableCategories});
 
   final void Function(Pub pub) onToggleFavourite;
+  final List<Pub> availableCategories;
 
   @override
   Widget build(BuildContext context) {

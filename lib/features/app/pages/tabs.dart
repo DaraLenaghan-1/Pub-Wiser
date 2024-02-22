@@ -1,11 +1,19 @@
+import 'package:first_app/data/firebase_store_implementation/firestore_pubData.dart';
 import 'package:first_app/features/app/pages/categories.dart';
 import 'package:first_app/features/app/pages/filters.dart';
 import 'package:first_app/features/app/pages/pubs_page.dart';
 import 'package:first_app/features/app/widgets/main_drawer.dart';
 import 'package:first_app/features/user_auth/UI/pages/home_page.dart';
 import 'package:first_app/models/pub.dart';
-
 import 'package:flutter/material.dart';
+
+const kInitialFilters = {
+  // k at the beginning of the global variable name is a Flutter convention to indicate that the variable is a constant // not required
+  Filter.beerGarden: false,
+  Filter.draughtIPA: false,
+  Filter.sportsBar: false,
+  Filter.traidBar: false,
+};
 
 class TabsPage extends StatefulWidget {
   const TabsPage({super.key});
@@ -19,6 +27,7 @@ class TabsPage extends StatefulWidget {
 class _TabsScreenState extends State<TabsPage> {
   int _selectedPageIndex = 0; // 0 for home 1 for categories, 2 for favourites
   final List<Pub> _favouritePubs = [];
+  Map<Filter, bool> _selectedFilters = kInitialFilters;
 
   void _showInfoMessage(String message) {
     ScaffoldMessenger.of(context).clearSnackBars();
@@ -31,7 +40,7 @@ class _TabsScreenState extends State<TabsPage> {
   }
 
   // Define a function to toggle a pub in the favourite pubs list
-  void _toggleMealFavourite(Pub pub) {
+  void _togglePubsFavourite(Pub pub) {
     final isExisting = _favouritePubs
         .contains(pub); //Check if the pub is already in the favourite pubs list
     if (isExisting) {
@@ -55,14 +64,20 @@ class _TabsScreenState extends State<TabsPage> {
     });
   }
 
-  void _setPage(String identifier) {
+  void _setPage(String identifier) async {
     Navigator.of(context).pop(); // Close the drawer
     if (identifier == 'filters') {
-      Navigator.of(context).push( //pushReplacement - replaces the current page instead of pushing a new page
+      final result = await Navigator.of(context).push<Map<Filter, bool>>(
+        //pushReplacement - replaces the current page instead of pushing a new page
         MaterialPageRoute(
-          builder: (ctx) => const FiltersPage(),
+          builder: (ctx) => FiltersPage(currentFilters: _selectedFilters),
         ),
       );
+
+      setState(() {
+        _selectedFilters = result ?? kInitialFilters;
+      });
+      print(result); // log the result from the filters page
     } else {
       Navigator.of(context).pop(); // Close the drawer
     }
@@ -70,16 +85,34 @@ class _TabsScreenState extends State<TabsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final availableCategories = FirestorePubData.where((pub) {
+      if (_selectedFilters[Filter.beerGarden]! && !pub.isBeerGarden) {
+        return false;
+      }
+      if (_selectedFilters[Filter.draughtIPA]! && !pub.isDraughtIPA) {
+        return false;
+      }
+      if (_selectedFilters[Filter.sportsBar]! && !pub.isSportsBar) {
+        return false;
+      }
+      if (_selectedFilters[Filter.traidBar]! && !pub.isTraidBar) {
+        return false;
+      }
+      return true;
+    }).toList();
+
     Widget activePage = const HomePage();
     var activePageTitle = 'Home';
 
     if (_selectedPageIndex == 1) {
-      activePage = CategoriesScreen(onToggleFavourite: _toggleMealFavourite);
+      activePage = CategoriesScreen(
+          onToggleFavourite: _togglePubsFavourite,
+          availableCategories: availableCategories);
       activePageTitle = 'Categories';
     } else if (_selectedPageIndex == 2) {
       activePage = PubsPage(
         pubs: _favouritePubs,
-        onToggleFavourite: _toggleMealFavourite,
+        onToggleFavourite: _togglePubsFavourite,
       );
       activePageTitle = 'Your Favourites';
     }
