@@ -1,5 +1,3 @@
-//import 'package:first_app/features/app/pages/tabs.dart';
-//import 'package:first_app/features/app/widgets/main_drawer.dart';
 import 'package:flutter/material.dart';
 
 enum Filter {
@@ -7,32 +5,25 @@ enum Filter {
   draughtIPA,
   sportsBar,
   traidBar,
+  // add more filters as needed
 }
 
 class FiltersPage extends StatefulWidget {
-  const FiltersPage({super.key, required this.currentFilters});
-
   final Map<Filter, bool> currentFilters;
 
+  const FiltersPage({Key? key, required this.currentFilters}) : super(key: key);
+
   @override
-  State<FiltersPage> createState() {
-    return _FiltersPageState();
-  }
+  _FiltersPageState createState() => _FiltersPageState();
 }
 
 class _FiltersPageState extends State<FiltersPage> {
-  var _beerGarden = false; // _beerGardenFilterSet
-  var _draughtIPA = false; // _draughtIPAFilterSet
-  var _sportsBar = false; // _sportsBarFilterSet
-  var _traidBar = false; // _traidBarFilterSet
+  late Map<Filter, bool> _selectedFilters;
 
   @override
   void initState() {
     super.initState();
-    _beerGarden = widget.currentFilters[Filter.beerGarden]!;
-    _draughtIPA = widget.currentFilters[Filter.draughtIPA]!;
-    _sportsBar = widget.currentFilters[Filter.sportsBar]!;
-    _traidBar = widget.currentFilters[Filter.traidBar]!;
+    _selectedFilters = Map.from(widget.currentFilters);
   }
 
   @override
@@ -40,112 +31,55 @@ class _FiltersPageState extends State<FiltersPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Filters'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.save),
+            onPressed: () => Navigator.of(context).pop(_selectedFilters),
+          ),
+        ],
       ),
-      // drawer: MainDrawer(onSelectPage: (identifier) {
-      //   if (identifier == 'pubs') {
-      //     Navigator.of(context).push( // pushReplacement
-      //       MaterialPageRoute(
-      //         builder: (ctx) => const TabsPage(),
-      //       ),
-      //     );
-      //   }
-      // }),
-      body: PopScope(
-        canPop: false,
-        onPopInvoked: (bool didPop) {
-          if (didPop) return;
-          Navigator.of(context).pop({
-            Filter.beerGarden: _beerGarden,
-            Filter.draughtIPA: _draughtIPA,
-            Filter.sportsBar: _sportsBar,
-            Filter.traidBar: _traidBar,
-          });
-        },
-        child: Column(children: [
-          SwitchListTile(
-            value: _beerGarden,
-            onChanged: (isChecked) {
-              setState(() {
-                _beerGarden = isChecked;
-              });
-            },
-            title: Text('Beer Gardens', // Beer Garden
-                style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                      color: Theme.of(context).colorScheme.onBackground,
-                    )),
-            subtitle: Text(
-              'Only show pubs with beer gardens',
-              style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    color: Theme.of(context).colorScheme.onBackground,
-                  ),
-            ),
-            activeColor: Theme.of(context)
-                .colorScheme
-                .tertiary, // Color of the switch when it is on
-            contentPadding: const EdgeInsets.only(left: 34, right: 22),
+      body: ListView(
+        children: [
+          _buildSwitchListTile(
+            filter: Filter.beerGarden,
+            title: 'Beer Gardens',
+            subtitle: 'Only show pubs with beer gardens',
           ),
-          SwitchListTile(
-            value: _draughtIPA,
-            onChanged: (isChecked) {
-              setState(() {
-                _draughtIPA = isChecked;
-              });
-            },
-            title: Text('IPA', // IPA
-                style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                      color: Theme.of(context).colorScheme.onBackground,
-                    )),
-            subtitle: Text(
-              'Only show pubs with draught IPA',
-              style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    color: Theme.of(context).colorScheme.onBackground,
-                  ),
-            ),
-            activeColor: Theme.of(context).colorScheme.tertiary,
-            contentPadding: const EdgeInsets.only(left: 34, right: 22),
+          _buildSwitchListTile(
+            filter: Filter.draughtIPA,
+            title: 'Draught IPA',
+            subtitle: 'Only show pubs with draught IPA',
           ),
-          SwitchListTile(
-            value: _sportsBar,
-            onChanged: (isChecked) {
-              setState(() {
-                _sportsBar = isChecked;
-              });
-            },
-            title: Text('Sports Bars', // sports bar
-                style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                      color: Theme.of(context).colorScheme.onBackground,
-                    )),
-            subtitle: Text(
-              'Only show pubs with sports on display',
-              style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    color: Theme.of(context).colorScheme.onBackground,
-                  ),
-            ),
-            activeColor: Theme.of(context).colorScheme.tertiary,
-            contentPadding: const EdgeInsets.only(left: 34, right: 22),
+          _buildSwitchListTile(
+            filter: Filter.sportsBar,
+            title: 'Sports Bars',
+            subtitle: 'Only show pubs with sports bars',
           ),
-          SwitchListTile(
-            value: _traidBar,
-            onChanged: (isChecked) {
-              setState(() {
-                _traidBar = isChecked;
-              });
-            },
-            title: Text('Traid Bars', // Traid Bar
-                style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                      color: Theme.of(context).colorScheme.onBackground,
-                    )),
-            subtitle: Text(
-              'Only show pubs with draught IPA',
-              style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    color: Theme.of(context).colorScheme.onBackground,
-                  ),
-            ),
-            activeColor: Theme.of(context).colorScheme.tertiary,
-            contentPadding: const EdgeInsets.only(left: 34, right: 22),
+          _buildSwitchListTile(
+            filter: Filter.traidBar,
+            title: 'Traid Bars',
+            subtitle: 'Only show pubs that are traid bars',
           ),
-        ]),
+          // Add more filters as needed
+        ],
       ),
+    );
+  }
+
+  Widget _buildSwitchListTile({
+    required Filter filter,
+    required String title,
+    required String subtitle,
+  }) {
+    return SwitchListTile(
+      title: Text(title),
+      subtitle: Text(subtitle),
+      value: _selectedFilters[filter] ?? false,
+      onChanged: (bool value) {
+        setState(() {
+          _selectedFilters[filter] = value;
+        });
+      },
     );
   }
 }

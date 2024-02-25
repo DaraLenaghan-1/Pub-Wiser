@@ -4,15 +4,23 @@ import 'package:first_app/features/app/widgets/category_grid_item.dart';
 import 'package:first_app/models/category.dart';
 import 'package:first_app/features/app/pages/pubs_page.dart';
 import 'package:first_app/models/pub.dart';
+import 'package:first_app/features/app/pages/filters.dart';
 
 class CategoriesScreen extends StatelessWidget {
-  const CategoriesScreen({super.key, required this.onToggleFavourite, required this.availableCategories});
+  const CategoriesScreen(
+      {Key? key,
+      required this.onToggleFavourite,
+      required this.availableCategories})
+      : super(key: key);
 
   final void Function(Pub pub) onToggleFavourite;
   final List<Pub> availableCategories;
 
   @override
   Widget build(BuildContext context) {
+    final Map<Filter, bool> currentFilters =
+        ModalRoute.of(context)?.settings.arguments as Map<Filter, bool> ?? {};
+    
     return FutureBuilder<List<Category>>(
       future: FirestoreService().getCategories(),
       builder: (context, snapshot) {
@@ -35,9 +43,9 @@ class CategoriesScreen extends StatelessWidget {
               return CategoryGridItem(
                   category: category,
                   onSelectCategory: () async {
-                    // Fetch pubs for the selected category
+                    // Fetch pubs for the selected category with the current filters
                     List<Pub> filteredPubs =
-                        await FirestoreService().getPubs(category.id);
+                        await FirestoreService().getPubs(category.id, filters: currentFilters,);
 
                     // Navigate to the PubsPage with the fetched pubs and category title
                     Navigator.of(context).push(
@@ -57,7 +65,7 @@ class CategoriesScreen extends StatelessWidget {
             },
           );
         } else {
-          return Text('No categories found');
+          return const Text('No categories found');
         }
       },
     );
