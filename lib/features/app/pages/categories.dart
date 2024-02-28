@@ -4,7 +4,7 @@ import 'package:first_app/features/app/widgets/category_grid_item.dart';
 import 'package:first_app/models/category.dart';
 import 'package:first_app/features/app/pages/pubs_page.dart';
 import 'package:first_app/models/pub.dart';
-import 'package:first_app/features/app/pages/filters.dart';
+import 'package:first_app/features/app/pages/filters.dart' as app_filters;
 
 class CategoriesScreen extends StatelessWidget {
   const CategoriesScreen(
@@ -18,9 +18,11 @@ class CategoriesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Map<Filter, bool> currentFilters =
-        ModalRoute.of(context)?.settings.arguments as Map<Filter, bool> ?? {};
-    
+    final Map<app_filters.Filter, bool> currentFilters = ModalRoute.of(context)
+            ?.settings
+            .arguments as Map<app_filters.Filter, bool> ??
+        {};
+
     return FutureBuilder<List<Category>>(
       future: FirestoreService().getCategories(),
       builder: (context, snapshot) {
@@ -44,8 +46,10 @@ class CategoriesScreen extends StatelessWidget {
                   category: category,
                   onSelectCategory: () async {
                     // Fetch pubs for the selected category with the current filters
-                    List<Pub> filteredPubs =
-                        await FirestoreService().getPubs(category.id, filters: currentFilters,);
+                    List<Pub> filteredPubs = await FirestoreService().getPubs(
+                      category.id,
+                      filters: currentFilters,
+                    );
 
                     // Navigate to the PubsPage with the fetched pubs and category title
                     Navigator.of(context).push(

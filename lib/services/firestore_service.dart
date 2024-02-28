@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:first_app/models/category.dart';
 import 'package:first_app/models/pub.dart';
+import 'package:first_app/features/app/pages/filters.dart' as app_filters;
 
 class FirestoreService {
   FirebaseFirestore _firestore =
@@ -23,7 +24,7 @@ class FirestoreService {
 
   // fetch pubs with a category filter and additional boolean filters
   Future<List<Pub>> getPubs(String categoryId,
-      {Map<Filter, bool>? filters}) async {
+      {Map<app_filters.Filter, bool>? filters}) async {
     //QuerySnapshot snapshot = await FirebaseFirestore.instance
     Query query = _firestore
         .collection('pubData')
@@ -48,19 +49,19 @@ class FirestoreService {
   }
 
   // Helper method to convert from Filter enum to Firestore field name
-  String _getFirestoreFieldName(Filter filter) {
+  String _getFirestoreFieldName(app_filters.Filter filter) {
     switch (filter) {
-      case Filter.beerGarden:
-        return 'isBeerGarden';
-      case Filter.draughtIPA:
-        return 'isDraughtIPA';
-      case Filter.sportsBar:
-        return 'isSportsBar';
-      case Filter.traidBar:
-        return 'isTraidBar';
-      // Add more cases as needed for other filters
-      default:
-        throw Exception('Unknown filter: $filter');
+        case app_filters.Filter.beerGarden:
+            return 'isBeerGarden';
+        case app_filters.Filter.draughtIPA:
+            return 'isDraughtIPA';
+        case app_filters.Filter.sportsBar:
+            return 'isSportsBar';
+        case app_filters.Filter.traidBar:
+            return 'isTraidBar';
+        // Add more cases as needed
+        default:
+            throw Exception('Unknown filter: $filter');
     }
   }
 }
