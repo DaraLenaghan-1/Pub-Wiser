@@ -1,4 +1,3 @@
-import 'package:first_app/features/app/widgets/pub_item_trait.dart';
 import 'package:flutter/material.dart';
 import 'package:first_app/models/pub.dart';
 import 'package:transparent_image/transparent_image.dart';

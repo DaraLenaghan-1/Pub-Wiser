@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:first_app/features/user_auth/UI/widgets/form_container_widget.dart';
 import 'package:first_app/features/user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 
 class LoginPage extends StatefulWidget {
@@ -143,7 +141,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ), 
               */
-              SizedBox(
+              const SizedBox(
                 height: 20,
               ),
 

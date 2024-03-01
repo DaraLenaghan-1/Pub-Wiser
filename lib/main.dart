@@ -7,7 +7,6 @@ import 'package:first_app/features/user_auth/UI/pages/home_page.dart';
 import 'package:first_app/features/app/pages/categories.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:first_app/features/app/pages/tabs.dart';
-import 'package:first_app/data/firebase_store_implementation/firestore_pubData.dart';
 
 final theme = ThemeData(
   useMaterial3: true,

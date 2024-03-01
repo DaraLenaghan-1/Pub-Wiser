@@ -4,7 +4,7 @@ import 'package:first_app/models/pub.dart';
 import 'package:first_app/features/app/pages/filters.dart' as app_filters;
 
 class FirestoreService {
-  FirebaseFirestore _firestore =
+  final FirebaseFirestore _firestore =
       FirebaseFirestore.instance; // Create an instance of Firestore
 
   // fetch categories from Firestore

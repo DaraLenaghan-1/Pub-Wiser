@@ -11,7 +11,7 @@ class PubItemTrait extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, size: 17, color: Colors.white,),
-        SizedBox(width: 6),
+        const SizedBox(width: 6),
         Text(label, style: const TextStyle(
           color: Colors.white,
           //fontSize: 17,

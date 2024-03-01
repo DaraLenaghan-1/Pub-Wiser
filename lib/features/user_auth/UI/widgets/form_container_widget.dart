@@ -68,7 +68,7 @@ class _FormContainerWidgetState extends State<FormContainerWidget> {
             print('Input text: $text');
           },
           decoration: InputDecoration(
-            border: OutlineInputBorder(), // Add a border for testing purposes
+            border: const OutlineInputBorder(), // Add a border for testing purposes
             //border: InputBorder.none,
             filled: true,
             hintText: widget.hintText,
