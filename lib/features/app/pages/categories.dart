@@ -4,13 +4,15 @@ import 'package:first_app/features/app/widgets/category_grid_item.dart';
 import 'package:first_app/models/category.dart';
 import 'package:first_app/features/app/pages/pubs_page.dart';
 import 'package:first_app/models/pub.dart';
-import 'package:first_app/features/app/pages/filters.dart' as app_filters;
+import 'package:first_app/models/filter_enum.dart';
+//import 'package:first_app/features/app/pages/filters.dart' as app_filters;
 
 class CategoriesScreen extends StatelessWidget {
   const CategoriesScreen(
       {Key? key,
       required this.onToggleFavourite,
-      required this.availableCategories})
+      required this.availableCategories,
+      required List<Pub> pubs})
       : super(key: key);
 
   final void Function(Pub pub) onToggleFavourite;
@@ -18,10 +20,8 @@ class CategoriesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Map<app_filters.Filter, bool> currentFilters = ModalRoute.of(context)
-            ?.settings
-            .arguments as Map<app_filters.Filter, bool> ??
-        {};
+    final Map<Filter, bool> currentFilters =
+        ModalRoute.of(context)?.settings.arguments as Map<Filter, bool> ?? {};
 
     return FutureBuilder<List<Category>>(
       future: FirestoreService().getCategories(),
@@ -52,12 +52,14 @@ class CategoriesScreen extends StatelessWidget {
                     );
 
                     // Navigate to the PubsPage with the fetched pubs and category title
-                    Navigator.of(context).push(
+                    Navigator.push(
+                      context,
                       MaterialPageRoute(
                         builder: (context) => PubsPage(
                           title: category.title,
                           pubs: filteredPubs,
                           onToggleFavourite: onToggleFavourite,
+                          
                         ),
                       ),
                     );

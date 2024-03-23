@@ -3,7 +3,7 @@ import 'package:first_app/features/app/splash_screen/splash_screen.dart';
 import 'package:first_app/features/user_auth/UI/pages/login_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:first_app/features/user_auth/UI/pages/home_page.dart';
+import 'package:first_app/features/app/pages/home_page.dart';
 import 'package:first_app/features/app/pages/categories.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:first_app/features/app/pages/tabs.dart';
@@ -46,8 +46,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/home': (context) => const HomePage(),
         '/login': (context) => const LoginPage(),
-        '/categories': (context) =>
-            CategoriesScreen(onToggleFavourite: (pub) {}),
+        // '/categories': (context) =>
+        //CategoriesScreen(onToggleFavourite: (pub) {}),
         '/tabs': (context) => const TabsPage(),
       },
     );

@@ -1,12 +1,5 @@
 import 'package:flutter/material.dart';
-
-enum Filter {
-  beerGarden,
-  draughtIPA,
-  sportsBar,
-  traidBar,
-  // add more filters as needed
-}
+import 'package:first_app/models/filter_enum.dart';
 
 class FiltersPage extends StatefulWidget {
   final Map<Filter, bool> currentFilters;
