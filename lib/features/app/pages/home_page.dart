@@ -59,6 +59,14 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Future<void> _goToCamPosition(LatLng position) async {
+    final GoogleMapController controller = await _mapController.future;
+    CameraPosition _newCamPosition = CameraPosition(target: position, zoom: 14);
+    await controller.animateCamera(
+      CameraUpdate.newCameraPosition(_newCamPosition),
+    );
+  }
+
   Future<void> getLocationUpdates() async {
     bool _serviceEnabled;
     PermissionStatus _permissionGranted;
@@ -83,6 +91,7 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           _currentPosition =
               LatLng(currentLocation.latitude!, currentLocation.longitude!);
+          _goToCamPosition(_currentPosition!);
           print(_currentPosition);
         });
       }
