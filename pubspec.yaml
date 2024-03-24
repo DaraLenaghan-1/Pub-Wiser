@@ -43,7 +43,8 @@ dependencies:
   transparent_image: ^2.0.1
   google_maps_flutter: ^2.6.0
   location: ^5.0.3
-  
+  flutter_polyline_points: ^2.0.0
+
 # firebase_core: ^2.21.0
 # This is the core Firebase library. It is required to use any Firebase service in your Flutter application.
 # It provides the basic Firebase setup and initialization functionality.

@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:first_app/const.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -23,10 +25,18 @@ class _HomePageState extends State<HomePage> {
       LatLng(53.27022682627128, -9.053970096184496); //position of spanish arch
   LatLng? _currentPosition = null;
 
+  Map<PolylineId, Polyline> _polylines = {};
+
   @override
   void initState() {
     super.initState();
-    getLocationUpdates();
+    getLocationUpdates().then(
+      (_) => {
+        getPolyline().then((coordinates) => {
+              setPolylines(coordinates),
+            }),
+      },
+    );
   }
 
   @override
@@ -55,6 +65,7 @@ class _HomePageState extends State<HomePage> {
                     markerId: MarkerId('_sourceLocation'),
                     position: _pGalwayCitySpanishArch)
               },
+              polylines: Set<Polyline>.of(_polylines.values),
             ),
     );
   }
@@ -95,6 +106,40 @@ class _HomePageState extends State<HomePage> {
           print(_currentPosition);
         });
       }
+    });
+  }
+
+  Future<List<LatLng>> getPolyline() async {
+    List<LatLng> polylineCoordinates = [];
+    PolylinePoints polylinePoints = PolylinePoints();
+    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+      GOOGLE_MAPS_API_KEY,
+      PointLatLng(
+          _pGalwayCitySpanishArch.latitude, _pGalwayCitySpanishArch!.longitude),
+      PointLatLng(_pGalwayCity.latitude, _pGalwayCity.longitude),
+      travelMode: TravelMode.walking,
+    );
+    if (result.points.isNotEmpty) {
+      result.points.forEach((PointLatLng point) {
+        polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+      });
+    } else {
+      print(result.errorMessage);
+    }
+    return polylineCoordinates;
+  }
+
+  void setPolylines(List<LatLng> polylineCoordinates) async {
+    // List<LatLng> polylineCoordinates = await getPolyline();
+    PolylineId id = PolylineId("poly");
+    Polyline polyline = Polyline(
+      polylineId: id,
+      color: Colors.red,
+      points: polylineCoordinates,
+      width: 3,
+    );
+    setState(() {
+      _polylines[id] = polyline;
     });
   }
 }
