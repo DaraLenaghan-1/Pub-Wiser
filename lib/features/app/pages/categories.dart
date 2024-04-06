@@ -21,7 +21,9 @@ class CategoriesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Map<Filter, bool> currentFilters =
-        ModalRoute.of(context)?.settings.arguments as Map<Filter, bool> ?? {};
+        ModalRoute.of(context)?.settings.arguments is Map<Filter, bool>
+            ? ModalRoute.of(context)!.settings.arguments as Map<Filter, bool>
+            : {};
 
     return FutureBuilder<List<Category>>(
       future: FirestoreService().getCategories(),
@@ -59,7 +61,6 @@ class CategoriesScreen extends StatelessWidget {
                           title: category.title,
                           pubs: filteredPubs,
                           onToggleFavourite: onToggleFavourite,
-                          
                         ),
                       ),
                     );
