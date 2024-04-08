@@ -17,23 +17,26 @@ class FirestoreService {
   // Fetch pubs with a category filter and additional boolean filters
   Future<List<Pub>> getPubs(String categoryId,
       {Map<Filter, bool>? filters}) async {
-    fs.Query query = _firestore.collection('pubData');
-    if (categoryId.isNotEmpty) {
-      query = query.where('categories', arrayContains: categoryId);
-    }
-
-    // Apply additional filters
-    filters?.forEach((filter, value) {
-      if (value) {
-        String fieldName =
-            toFirestoreFieldName(filter); // Use the unified utility function
-        query = query.where(fieldName, isEqualTo: value);
+    try {
+      fs.Query query = _firestore.collection('pubData');
+      if (categoryId.isNotEmpty) {
+        query = query.where('categories', arrayContains: categoryId);
       }
-    });
 
-    fs.QuerySnapshot snapshot = await query.get();
-    print(
-        'Number of pubs fetched for category $categoryId with filters: ${snapshot.docs.length}');
-    return snapshot.docs.map((doc) => Pub.fromFirestore(doc)).toList();
+      filters?.forEach((filter, value) {
+        if (value) {
+          String fieldName = toFirestoreFieldName(filter);
+          query = query.where(fieldName, isEqualTo: value);
+        }
+      });
+
+      fs.QuerySnapshot snapshot = await query.get();
+      print(
+          'Number of pubs fetched for category $categoryId with filters: ${snapshot.docs.length}');
+      return snapshot.docs.map((doc) => Pub.fromFirestore(doc)).toList();
+    } catch (e) {
+      print('Error fetching pubs: $e');
+      return []; // Return an empty list on error or consider rethrowing
+    }
   }
 }
