@@ -112,7 +112,7 @@ class _TabsScreenState extends State<TabsPage> {
             ),
         ],
       ),
-      drawer: MainDrawer(onSelectPage: (page) {}),
+      drawer: MainDrawer(onSelectPage: (page) {}, currentFilters: {},),
       body: _buildActivePage(),
       bottomNavigationBar: BottomNavigationBar(
         onTap: _selectPage,
