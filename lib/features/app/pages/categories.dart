@@ -12,11 +12,13 @@ class CategoriesScreen extends StatelessWidget {
       {Key? key,
       required this.onToggleFavourite,
       required this.availableCategories,
+      required this.currentFilters,
       required List<Pub> pubs})
       : super(key: key);
 
   final void Function(Pub pub) onToggleFavourite;
   final List<Pub> availableCategories;
+  final Map<Filter, bool> currentFilters;
 
   @override
   Widget build(BuildContext context) {

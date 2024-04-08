@@ -80,7 +80,9 @@ class _TabsScreenState extends State<TabsPage> {
             } else if (snapshot.hasData) {
               return CategoriesScreen(
                 pubs: snapshot.data!,
-                onToggleFavourite: _togglePubsFavourite, availableCategories: [],
+                onToggleFavourite: _togglePubsFavourite, 
+                availableCategories: [],
+                currentFilters: _selectedFilters,
               );
             } else {
               return Text('No pubs found');
