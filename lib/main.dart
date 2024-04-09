@@ -4,9 +4,9 @@ import 'package:first_app/features/user_auth/UI/pages/login_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:first_app/features/app/pages/home_page.dart';
-import 'package:first_app/features/app/pages/categories.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:first_app/features/app/pages/tabs.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; 
+import 'package:google_fonts/google_fonts.dart';
 
 final theme = ThemeData(
   useMaterial3: true,
@@ -16,6 +16,7 @@ final theme = ThemeData(
   ),
   textTheme: GoogleFonts.latoTextTheme(),
 );
+
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (kIsWeb) {
@@ -25,10 +26,15 @@ Future main() async {
             appId: "1:22358758973:web:5bff6f4b32bbe9ce95fc54",
             messagingSenderId: "22358758973",
             projectId: "loginpage-ad2ee"));
+  } else {
+    await Firebase.initializeApp();
   }
 
-  await Firebase.initializeApp();
-  runApp(const MyApp());
+  runApp(
+    ProviderScope(  // Wrapped app with ProviderScope
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -39,15 +45,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Pub Wiser',
-      theme: ThemeData(useMaterial3: true),
-      home: const SplashScreen(
-        child: LoginPage(),
-      ),
+      theme: theme,
+      home: const SplashScreen(child: LoginPage()),
       routes: {
         '/home': (context) => const HomePage(),
         '/login': (context) => const LoginPage(),
-        // '/categories': (context) =>
-        //CategoriesScreen(onToggleFavourite: (pub) {}),
+        // '/categories': (context) => CategoriesScreen(onToggleFavourite: (pub) {}),
         '/tabs': (context) => const TabsPage(),
       },
     );

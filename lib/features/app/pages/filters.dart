@@ -1,78 +1,50 @@
+import 'package:first_app/providers/filter_provider';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:first_app/models/filter_enum.dart';
 
-class FiltersPage extends StatefulWidget {
-  final Map<Filter, bool> currentFilters;
-
-  const FiltersPage({Key? key, required this.currentFilters}) : super(key: key);
+class FiltersPage extends ConsumerWidget {
+  const FiltersPage({Key? key}) : super(key: key);
 
   @override
-  _FiltersPageState createState() => _FiltersPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    Map<Filter, bool> filters = ref.watch(filterProvider);
 
-class _FiltersPageState extends State<FiltersPage> {
-  late Map<Filter, bool> _selectedFilters;
+    void _handleFilterChange(Filter filter, bool isChecked) {
+      ref.read(filterProvider.notifier).updateFilter(filter, isChecked);
+    }
 
-  @override
-  void initState() {
-    super.initState();
-    _selectedFilters = Map.from(widget.currentFilters);
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Filters'),
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
-            onPressed: () => Navigator.of(context).pop(_selectedFilters),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
           ),
         ],
       ),
       body: ListView(
-        children: [
-          _buildSwitchListTile(
-            filter: Filter.beerGarden,
-            title: 'Beer Gardens',
-            subtitle: 'Only show pubs with beer gardens',
-          ),
-          _buildSwitchListTile(
-            filter: Filter.draughtIPA,
-            title: 'Draught IPA',
-            subtitle: 'Only show pubs with draught IPA',
-          ),
-          _buildSwitchListTile(
-            filter: Filter.sportsBar,
-            title: 'Sports Bars',
-            subtitle: 'Only show pubs with sports bars',
-          ),
-          _buildSwitchListTile(
-            filter: Filter.traidBar,
-            title: 'Traid Bars',
-            subtitle: 'Only show pubs that are traid bars',
-          ),
-          // Add more filters as needed
-        ],
+        children: Filter.values.map((filter) {
+          String title = filter.toString().split('.').last.replaceAll('_', ' ').capitalize();
+          return SwitchListTile(
+            title: Text(title),
+            subtitle: Text('Only show pubs with $title'),
+            value: filters[filter] ?? false,
+            onChanged: (bool value) {
+              _handleFilterChange(filter, value);
+            },
+          );
+        }).toList(),
       ),
     );
   }
+}
 
-  Widget _buildSwitchListTile({
-    required Filter filter,
-    required String title,
-    required String subtitle,
-  }) {
-    return SwitchListTile(
-      title: Text(title),
-      subtitle: Text(subtitle),
-      value: _selectedFilters[filter] ?? false,
-      onChanged: (bool value) {
-        setState(() {
-          _selectedFilters[filter] = value;
-        });
-      },
-    );
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${substring(1).toLowerCase()}";
   }
 }

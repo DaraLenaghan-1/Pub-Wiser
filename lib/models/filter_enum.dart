@@ -18,8 +18,7 @@ String toFirestoreFieldName(Filter filter) {
       return 'isSportsBar';
     case Filter.traidBar:
       return 'isTraidBar';
-    // Add more cases
     default:
-      throw Exception('Unknown Filter: $filter');
+      throw Exception('No Firestore field defined for filter: $filter');
   }
 }

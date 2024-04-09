@@ -1,34 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:first_app/models/filter_enum.dart';
+import 'package:first_app/providers/filter_provider';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:first_app/features/app/pages/filters.dart';
 import 'package:first_app/features/app/pages/categories.dart';
 import 'package:first_app/features/app/pages/pubs_page.dart';
 import 'package:first_app/features/app/widgets/main_drawer.dart';
 import 'package:first_app/features/app/pages/home_page.dart';
 import 'package:first_app/models/pub.dart';
-import 'package:first_app/services/firestore_service.dart';
-import 'package:first_app/models/filter_enum.dart';
 
-
-class TabsPage extends StatefulWidget {
+class TabsPage extends ConsumerStatefulWidget {
   const TabsPage({Key? key}) : super(key: key);
 
   @override
-  _TabsScreenState createState() => _TabsScreenState();
+  _TabsPageState createState() => _TabsPageState();
 }
 
-class _TabsScreenState extends State<TabsPage> {
+class _TabsPageState extends ConsumerState<TabsPage> {
   int _selectedPageIndex = 0;
   final List<Pub> _favouritePubs = [];
-  Map<Filter, bool> _selectedFilters = {
-    Filter.beerGarden: false,
-    Filter.draughtIPA: false,
-    Filter.sportsBar: false,
-    Filter.traidBar: false,
-  };
 
   void _showInfoMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), duration: Duration(seconds: 2)),
+      SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
     );
   }
 
@@ -53,41 +47,57 @@ class _TabsScreenState extends State<TabsPage> {
   void _setFilters() async {
     final newFilters = await Navigator.of(context).push<Map<Filter, bool>>(
       MaterialPageRoute(
-        builder: (context) => FiltersPage(currentFilters: _selectedFilters),
+        builder: (context) =>
+            FiltersPage(currentFilters: ref.watch(filterProvider)),
       ),
     );
 
     if (newFilters != null) {
-      setState(() {
-        _selectedFilters = newFilters;
-      });
+      ref.read(filterProvider.notifier).state = newFilters;
     }
   }
 
-  Widget _buildActivePage() {
+  @override
+  Widget build(BuildContext context) {
+    final currentFilters = ref.watch(filterProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_selectedPageIndex == 1
+            ? 'Categories'
+            : _selectedPageIndex == 2
+                ? 'Your Favourites'
+                : 'Home'),
+        actions: [
+          if (_selectedPageIndex == 1)
+            IconButton(
+              icon: const Icon(Icons.filter_list),
+              onPressed: _setFilters,
+            ),
+        ],
+      ),
+      drawer:
+          MainDrawer(onSelectPage: (page) {}, currentFilters: currentFilters),
+      body: _buildActivePage(currentFilters),
+      bottomNavigationBar: BottomNavigationBar(
+        onTap: _selectPage,
+        currentIndex: _selectedPageIndex,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.local_bar), label: 'Categories'),
+          BottomNavigationBarItem(icon: Icon(Icons.star), label: 'Favourites'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActivePage(Map<Filter, bool> filters) {
     switch (_selectedPageIndex) {
       case 1:
-        return FutureBuilder<List<Pub>>(
-          future: FirestoreService().getPubs(
-            "", // Pass the selected category ID here
-            filters: _selectedFilters
-          ),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator();
-            } else if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            } else if (snapshot.hasData) {
-              return CategoriesScreen(
-                pubs: snapshot.data!,
-                onToggleFavourite: _togglePubsFavourite, 
-                availableCategories: [],
-                currentFilters: _selectedFilters,
-              );
-            } else {
-              return Text('No pubs found');
-            }
-          },
+        return CategoriesScreen(
+          onToggleFavourite: _togglePubsFavourite,
+          availableCategories: [],
         );
       case 2:
         return PubsPage(
@@ -95,34 +105,7 @@ class _TabsScreenState extends State<TabsPage> {
           onToggleFavourite: _togglePubsFavourite,
         );
       default:
-        return HomePage();
+        return const HomePage();
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_selectedPageIndex == 1 ? 'Categories' : _selectedPageIndex == 2 ? 'Your Favourites' : 'Home'),
-        actions: [
-          if (_selectedPageIndex == 1)
-            IconButton(
-              icon: Icon(Icons.filter_list),
-              onPressed: _setFilters,
-            ),
-        ],
-      ),
-      drawer: MainDrawer(onSelectPage: (page) {}, currentFilters: {},),
-      body: _buildActivePage(),
-      bottomNavigationBar: BottomNavigationBar(
-        onTap: _selectPage,
-        currentIndex: _selectedPageIndex,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.local_bar), label: 'Categories'),
-          BottomNavigationBarItem(icon: Icon(Icons.star), label: 'Favourites'),
-        ],
-      ),
-    );
   }
 }

@@ -1,17 +1,16 @@
-import 'package:first_app/features/app/pages/filters.dart';
-import 'package:first_app/models/filter_enum.dart';
+import 'package:first_app/providers/filter_provider';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:first_app/features/app/pages/filters.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:first_app/global/common/toast.dart';
 
-class MainDrawer extends StatelessWidget {
-  const MainDrawer({super.key, required this.onSelectPage, required this.currentFilters});
-
-  final void Function(String identifier) onSelectPage;
-  final Map<Filter, bool> currentFilters;
+class MainDrawer extends ConsumerWidget {
+  const MainDrawer({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentFilters = ref.watch(filterProvider);
 
     return Drawer(
       child: Column(
@@ -43,41 +42,18 @@ class MainDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: Icon(Icons.liquor, size: 26, color: Theme.of(context).colorScheme.onBackground),
-            title: Text(
-              'Pubs',
-              style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                    color: Theme.of(context).colorScheme.onBackground,
-                    fontSize: 24,
-                  ),
-            ),
-            onTap: () => onSelectPage('pubs'), //TODO: navigate to pubs page
+            title: Text('Pubs', style: Theme.of(context).textTheme.titleSmall!.copyWith(fontSize: 24)),
+            onTap: () => Navigator.of(context).popAndPushNamed('/pubs'),
           ),
           ListTile(
             leading: Icon(Icons.settings, size: 26, color: Theme.of(context).colorScheme.onBackground),
-            title: Text(
-              'Filters',
-              style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                    color: Theme.of(context).colorScheme.onBackground,
-                    fontSize: 24,
-                  ),
-            ),
-            onTap: () {
-              // Navigate to FiltersPage with currentFilters
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => FiltersPage(currentFilters: currentFilters),
-              ));
-            },
+            title: Text('Filters', style: Theme.of(context).textTheme.titleSmall!.copyWith(fontSize: 24)),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const FiltersPage())),
           ),
-          Spacer(), // Pushes the logout button to the bottom
+          Spacer(),
           ListTile(
             leading: Icon(Icons.exit_to_app, size: 26, color: Theme.of(context).colorScheme.error),
-            title: Text(
-              'Sign Out',
-              style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                    color: Theme.of(context).colorScheme.error,
-                    fontSize: 24,
-                  ),
-            ),
+            title: Text('Sign Out', style: Theme.of(context).textTheme.titleSmall!.copyWith(fontSize: 24)),
             onTap: () async {
               await FirebaseAuth.instance.signOut();
               Navigator.pushNamedAndRemoveUntil(context, "/login", (route) => false);

@@ -1,34 +1,28 @@
+import 'package:first_app/providers/filter_provider';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:first_app/services/firestore_service.dart';
 import 'package:first_app/features/app/widgets/category_grid_item.dart';
 import 'package:first_app/models/category.dart';
 import 'package:first_app/features/app/pages/pubs_page.dart';
 import 'package:first_app/models/pub.dart';
-import 'package:first_app/models/filter_enum.dart';
-//import 'package:first_app/features/app/pages/filters.dart' as app_filters;
 
-class CategoriesScreen extends StatelessWidget {
-  const CategoriesScreen(
-      {Key? key,
-      required this.onToggleFavourite,
-      required this.availableCategories,
-      required this.currentFilters,
-      required List<Pub> pubs})
-      : super(key: key);
+class CategoriesScreen extends ConsumerWidget {
+  const CategoriesScreen({
+    Key? key,
+    required this.onToggleFavourite,
+    required this.availableCategories,
+  }) : super(key: key);
 
   final void Function(Pub pub) onToggleFavourite;
   final List<Pub> availableCategories;
-  final Map<Filter, bool> currentFilters;
 
   @override
-  Widget build(BuildContext context) {
-    final Map<Filter, bool> currentFilters =
-        ModalRoute.of(context)?.settings.arguments is Map<Filter, bool>
-            ? ModalRoute.of(context)!.settings.arguments as Map<Filter, bool>
-            : {};
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentFilters = ref.watch(filterProvider);
 
     return FutureBuilder<List<Category>>(
-      future: FirestoreService().getCategories(),
+      future: FirestoreService().getCategoriesFiltered(currentFilters),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
@@ -47,30 +41,25 @@ class CategoriesScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               Category category = snapshot.data![index];
               return CategoryGridItem(
-                  category: category,
-                  onSelectCategory: () async {
-                    // Fetch pubs for the selected category with the current filters
-                    List<Pub> filteredPubs = await FirestoreService().getPubs(
-                      category.id,
-                      filters: currentFilters,
-                    );
-
-                    // Navigate to the PubsPage with the fetched pubs and category title
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PubsPage(
-                          title: category.title,
-                          pubs: filteredPubs,
-                          onToggleFavourite: onToggleFavourite,
-                        ),
-                      ),
-                    );
-                  }
-                  // Implement the logic to handle category selection
-                  // This might involve navigating to another screen with the selected category
-
+                category: category,
+                onSelectCategory: () async {
+                  List<Pub> filteredPubs = await FirestoreService().getPubs(
+                    category.id,
+                    filters: currentFilters,
                   );
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PubsPage(
+                        title: category.title,
+                        pubs: filteredPubs,
+                        onToggleFavourite: onToggleFavourite,
+                      ),
+                    ),
+                  );
+                },
+              );
             },
           );
         } else {

@@ -7,16 +7,29 @@ import 'package:first_app/models/filter_enum.dart';
 class FirestoreService {
   final fs.FirebaseFirestore _firestore = fs.FirebaseFirestore.instance;
 
-  // Fetch categories from Firestore
-  Future<List<Category>> getCategories() async {
-    fs.QuerySnapshot snapshot =
-        await _firestore.collection('availableCategories').get();
-    return snapshot.docs.map((doc) => Category.fromFirestore(doc)).toList();
+  // Fetch categories from Firestore, now applying filters.
+  Future<List<Category>> getCategoriesFiltered(Map<Filter, bool> filters) async {
+    try {
+      fs.Query query = _firestore.collection('availableCategories');
+
+      // Apply filters dynamically based on the current filters
+      filters.forEach((filter, value) {
+        if (value) {
+          String fieldName = toFirestoreFieldName(filter);
+          query = query.where(fieldName, isEqualTo: true);
+        }
+      });
+
+      fs.QuerySnapshot snapshot = await query.get();
+      return snapshot.docs.map((doc) => Category.fromFirestore(doc)).toList();
+    } catch (e) {
+      print('Error fetching categories with filters: $e');
+      return [];  // Return an empty list on error or consider rethrowing
+    }
   }
 
   // Fetch pubs with a category filter and additional boolean filters
-  Future<List<Pub>> getPubs(String categoryId,
-      {Map<Filter, bool>? filters}) async {
+  Future<List<Pub>> getPubs(String categoryId, {Map<Filter, bool>? filters}) async {
     try {
       fs.Query query = _firestore.collection('pubData');
       if (categoryId.isNotEmpty) {
@@ -31,8 +44,7 @@ class FirestoreService {
       });
 
       fs.QuerySnapshot snapshot = await query.get();
-      print(
-          'Number of pubs fetched for category $categoryId with filters: ${snapshot.docs.length}');
+      print('Number of pubs fetched for category $categoryId with filters: ${snapshot.docs.length}');
       return snapshot.docs.map((doc) => Pub.fromFirestore(doc)).toList();
     } catch (e) {
       print('Error fetching pubs: $e');
