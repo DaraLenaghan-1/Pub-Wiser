@@ -5,18 +5,27 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:first_app/features/app/pages/home_page.dart';
 import 'package:first_app/features/app/pages/tabs.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 final theme = ThemeData(
   useMaterial3: true,
-  colorScheme: ColorScheme.fromSeed(
-    brightness: Brightness.light,
-    seedColor: const Color.fromARGB(255, 131, 57, 0),
+  colorScheme: ColorScheme.light(
+    primary:
+        const Color(0xFF14213D), // Dark blue, used for interactive elements
+    onPrimary: Colors.white, // For legibility on primary color
+    secondary: const Color(0xFFFCA311), // Orange, used for secondary accents
+    onSecondary: Colors.black, // For legibility on secondary color
+    background:
+        const Color(0xFFFFFFFF), // White background for general app usage
+    onBackground: Colors.black, // For legibility on background color
+    surface: const Color(0xFFE5E5E5), // Light gray for cards and UI surfaces
+    onSurface: Colors.black, // For legibility on surface color
+    error: Colors.redAccent, // Red for error states
+    onError: Colors.white, // White on error states for legibility
   ),
   textTheme: GoogleFonts.latoTextTheme(),
 );
-
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (kIsWeb) {
@@ -31,7 +40,8 @@ Future main() async {
   }
 
   runApp(
-    ProviderScope(  // Wrapped app with ProviderScope
+    ProviderScope(
+      // Wrapped app with ProviderScope
       child: const MyApp(),
     ),
   );

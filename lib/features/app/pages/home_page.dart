@@ -15,6 +15,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   Location _locationController = new Location();
+  StreamSubscription<LocationData>? _locationSubscription;
 
   final Completer<GoogleMapController> _mapController =
       Completer<GoogleMapController>();
@@ -30,13 +31,13 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    getLocationUpdates().then(
-      (_) => {
-        getPolyline().then((coordinates) => {
-              setPolylines(coordinates),
-            }),
-      },
-    );
+    getLocationUpdates();
+  }
+
+  @override
+  void dispose() {
+    _locationSubscription?.cancel(); // Cancel location subscription
+    super.dispose();
   }
 
   @override
@@ -83,11 +84,13 @@ class _HomePageState extends State<HomePage> {
     PermissionStatus _permissionGranted;
 
     _serviceEnabled = await _locationController.serviceEnabled();
-    if (_serviceEnabled) {
+    if (!_serviceEnabled) {
       _serviceEnabled = await _locationController.requestService();
-    } else {
-      return;
+      if (!_serviceEnabled) {
+        return;
+      }
     }
+
     _permissionGranted = await _locationController.hasPermission();
     if (_permissionGranted == PermissionStatus.denied) {
       _permissionGranted = await _locationController.requestPermission();
@@ -95,18 +98,30 @@ class _HomePageState extends State<HomePage> {
         return;
       }
     }
-    _locationController.onLocationChanged
-        .listen((LocationData currentLocation) {
-      if (currentLocation.latitude != null &&
-          currentLocation.longitude != null) {
-        setState(() {
-          _currentPosition =
-              LatLng(currentLocation.latitude!, currentLocation.longitude!);
+
+    _locationSubscription = _locationController.onLocationChanged.listen(
+      (LocationData currentLocation) async {
+        if (!mounted) return;
+        if (currentLocation.latitude != null &&
+            currentLocation.longitude != null) {
+          // Update current position and camera position
+          if (!mounted) return;
+          setState(() {
+            _currentPosition =
+                LatLng(currentLocation.latitude!, currentLocation.longitude!);
+          });
           _goToCamPosition(_currentPosition!);
-          print(_currentPosition);
-        });
-      }
-    });
+
+          // Fetch and set polyline
+          try {
+            List<LatLng> polylineCoordinates = await getPolyline();
+            setPolylines(polylineCoordinates);
+          } catch (e) {
+            print("Failed to fetch polyline: $e");
+          }
+        }
+      },
+    );
   }
 
   Future<List<LatLng>> getPolyline() async {
@@ -115,10 +130,11 @@ class _HomePageState extends State<HomePage> {
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
       GOOGLE_MAPS_API_KEY,
       PointLatLng(
-          _pGalwayCitySpanishArch.latitude, _pGalwayCitySpanishArch!.longitude),
+          _pGalwayCitySpanishArch.latitude, _pGalwayCitySpanishArch.longitude),
       PointLatLng(_pGalwayCity.latitude, _pGalwayCity.longitude),
       travelMode: TravelMode.walking,
     );
+
     if (result.points.isNotEmpty) {
       result.points.forEach((PointLatLng point) {
         polylineCoordinates.add(LatLng(point.latitude, point.longitude));
@@ -129,8 +145,7 @@ class _HomePageState extends State<HomePage> {
     return polylineCoordinates;
   }
 
-  void setPolylines(List<LatLng> polylineCoordinates) async {
-    // List<LatLng> polylineCoordinates = await getPolyline();
+  void setPolylines(List<LatLng> polylineCoordinates) {
     PolylineId id = PolylineId("poly");
     Polyline polyline = Polyline(
       polylineId: id,

@@ -22,7 +22,7 @@ class Category {
     );
   }
 
-  // Utility function to convert hex color to Color object.
+  // Utility function to conavert hex color to Color object.
   static Color hexToColor(String hexString) {
     final buffer = StringBuffer();
     if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
