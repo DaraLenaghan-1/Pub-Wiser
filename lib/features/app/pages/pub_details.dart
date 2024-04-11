@@ -5,13 +5,13 @@ import 'package:first_app/services/firestore_service.dart';
 
 class PubDetailsPage extends StatefulWidget {
   const PubDetailsPage({
-    super.key,
+    Key? key,
     required this.pub,
     required this.onToggleFavourite,
-  });
+  }) : super(key: key);
 
   final Pub pub;
-  final void Function(Pub pub) onToggleFavourite;
+  final void Function(Pub) onToggleFavourite;
 
   @override
   _PubDetailsPageState createState() => _PubDetailsPageState();
@@ -25,6 +25,56 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
     super.initState();
     // Initialize the drinksFuture with a method that fetches drink data for the current pub
     _drinksFuture = FirestoreService().getDrinkPrices(widget.pub.id);
+  }
+
+  Future<void> _showUpdatePriceDialog(BuildContext context, Drink drink) async {
+    TextEditingController _priceController = TextEditingController(text: drink.price.toString());
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // User must tap button to dismiss dialog
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Update Price for ${drink.name}'),
+          content: TextField(
+            controller: _priceController,
+            autofocus: true,
+            decoration: InputDecoration(
+              labelText: 'New Price',
+              hintText: 'e.g. 5.75',
+            ),
+            keyboardType: TextInputType.numberWithOptions(decimal: true),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Update'),
+              onPressed: () {
+                double? newPrice = double.tryParse(_priceController.text);
+                if (newPrice != null) {
+                  FirestoreService().updateDrinkPrice(drink.name, newPrice, widget.pub.id).then((_) {
+                    Navigator.of(context).pop();
+                    setState(() {
+                      // Trigger a state change to refresh the drink list
+                      _drinksFuture = FirestoreService().getDrinkPrices(widget.pub.id);
+                    });
+                  }).catchError((error) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error updating price: $error')),
+                    );
+                  });
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -48,38 +98,36 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
               width: double.infinity,
               fit: BoxFit.cover,
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: 14),
             Text(
               widget.pub.description,
               style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                     color: Theme.of(context).colorScheme.onBackground,
                   ),
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: 14),
             FutureBuilder<List<Drink>>(
               future: _drinksFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
+                  return CircularProgressIndicator();
                 } else if (snapshot.hasError) {
                   return Text('Error: ${snapshot.error}');
                 } else if (snapshot.hasData) {
-                  // Build the list of drink widgets
                   return Column(
-                    children: snapshot.data!
-                        .map((drink) => ListTile(
-                              title: Text(drink.name),
-                              trailing:
-                                  Text('${drink.price.toStringAsFixed(2)}'),
-                            ))
-                        .toList(),
+                    children: snapshot.data!.map((drink) {
+                      return ListTile(
+                        title: Text(drink.name),
+                        trailing: Text('€${drink.price.toStringAsFixed(2)}'),
+                        onTap: () => _showUpdatePriceDialog(context, drink),
+                      );
+                    }).toList(),
                   );
                 } else {
-                  return const Text('No drinks found');
+                  return Text('No drinks found');
                 }
               },
             ),
-            // Add more pub details as needed
           ],
         ),
       ),

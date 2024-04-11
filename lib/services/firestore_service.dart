@@ -71,4 +71,13 @@ class FirestoreService {
       return []; // Handle the error appropriately
     }
   }
+
+  Future<void> updateDrinkPrice(String drinkName, double newPrice, String pubId) async {
+    await fs.FirebaseFirestore.instance
+        .collection('pubData')
+        .doc(pubId)
+        .collection('drinkPrices')
+        .doc(drinkName)
+        .update({'price': newPrice});
+  }
 }

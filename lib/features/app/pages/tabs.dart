@@ -22,10 +22,22 @@ class _TabsPageState extends ConsumerState<TabsPage> {
     setState(() {
       if (_favouritePubs.contains(pub)) {
         _favouritePubs.remove(pub);
+        _showInfoMessage('Removed from favourites');
       } else {
         _favouritePubs.add(pub);
+        _showInfoMessage('Added to favourites');
       }
     });
+  }
+
+  void _showInfoMessage(String message) {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   void _selectPage(int index) {
@@ -71,7 +83,7 @@ class _TabsPageState extends ConsumerState<TabsPage> {
       case 1:
         return CategoriesScreen(
           onToggleFavourite: _togglePubsFavourite,
-          availableCategories: _favouritePubs, // Pass the favourite pubs or correct available categories list
+          availableCategories: _favouritePubs,
         );
       case 2:
         return PubsPage(pubs: _favouritePubs, onToggleFavourite: _togglePubsFavourite);
