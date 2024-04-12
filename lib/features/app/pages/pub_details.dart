@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:first_app/global/common/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:first_app/models/pub.dart';
 import 'package:first_app/models/drink.dart';
@@ -28,7 +31,8 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
   }
 
   Future<void> _showUpdatePriceDialog(BuildContext context, Drink drink) async {
-    TextEditingController _priceController = TextEditingController(text: drink.price.toString());
+    TextEditingController _priceController =
+        TextEditingController(text: drink.price.toString());
 
     return showDialog<void>(
       context: context,
@@ -57,12 +61,16 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
               onPressed: () {
                 double? newPrice = double.tryParse(_priceController.text);
                 if (newPrice != null) {
-                  FirestoreService().updateDrinkPrice(drink.name, newPrice, widget.pub.id).then((_) {
+                  FirestoreService()
+                      .updateDrinkPrice(drink.name, newPrice, widget.pub.id)
+                      .then((_) {
                     Navigator.of(context).pop();
                     setState(() {
-                      // Trigger a state change to refresh the drink list
-                      _drinksFuture = FirestoreService().getDrinkPrices(widget.pub.id);
+                      _drinksFuture =
+                          FirestoreService().getDrinkPrices(widget.pub.id);
                     });
+                    // Now also pass drink name along with pub ID
+                    createPriceSuggestion(widget.pub.id, drink.name, newPrice);
                   }).catchError((error) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Error updating price: $error')),
@@ -127,10 +135,41 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
                   return Text('No drinks found');
                 }
               },
-            ),
+            )
           ],
         ),
       ),
     );
+  }
+
+  void createPriceSuggestion(
+      String pubId, String drinkName, double newPrice) async {
+    var currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      // Construct the document ID based on user and current timestamp
+      String docId =
+          "${currentUser.uid}_${Timestamp.now().millisecondsSinceEpoch}";
+
+      var newSuggestion = {
+        "userId": currentUser.uid,
+        "userEmail": currentUser.email!,
+        "suggestedPrice": newPrice,
+        "timestamp": Timestamp.now(),
+        "votes": 0,
+      };
+
+      await FirebaseFirestore.instance
+          .collection('pubData')
+          .doc(pubId)
+          .collection('drinkPrices')
+          .doc(drinkName)
+          .collection('PriceSuggestions')
+          .doc(docId) // Use the custom document ID
+          .set(newSuggestion);
+
+      showToast(message: "Price suggestion added successfully!");
+    } else {
+      showToast(message: "No user logged in!");
+    }
   }
 }

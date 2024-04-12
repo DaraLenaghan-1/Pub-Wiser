@@ -3,24 +3,28 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Drink {
   final String name;
   final double price;
-  final List<PriceSuggestion> priceSuggestions; // A list to hold price suggestions
+  final List<PriceSuggestion> priceSuggestions;
 
-  Drink({
-    required this.name,
-    required this.price,
-    this.priceSuggestions = const [],
-  });
+  Drink({required this.name, required this.price, this.priceSuggestions = const []});
 
-  // Factory method to create a Drink from Firestore document snapshot
   factory Drink.fromFirestore(DocumentSnapshot doc) {
+    var data = doc.data() as Map<String, dynamic>?; // Safely cast to Map with null check
+    if (data == null) {
+      throw Exception("Document data is not available");
+    }
     return Drink(
-      name: doc.id,  // Use the document ID as the drink name
-      price: (doc['price'] as num).toDouble(),  // Cast the price to double
-      priceSuggestions: (doc['priceSuggestions'] as List<dynamic> ?? []).map((suggestion) => 
-        PriceSuggestion.fromMap(suggestion)).toList(),
+      name: doc.id,
+      price: (data['price'] as num).toDouble(),
+      priceSuggestions: data['priceSuggestions'] != null 
+        ? (data['priceSuggestions'] as List<dynamic>)
+            .map((s) => PriceSuggestion.fromMap(s as Map<String, dynamic>))
+            .toList()
+        : [],
     );
   }
 }
+
+
 
 // Define a PriceSuggestion class to handle the structure of each price suggestion
 class PriceSuggestion {

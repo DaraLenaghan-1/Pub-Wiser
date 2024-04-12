@@ -58,7 +58,7 @@ class FirestoreService {
 
   Future<List<Drink>> getDrinkPrices(String pubId) async {
     try {
-      fs.QuerySnapshot snapshot = await _firestore
+      fs.QuerySnapshot snapshot = await fs.FirebaseFirestore.instance
           .collection('pubData')
           .doc(pubId)
           .collection('drinkPrices')
@@ -67,12 +67,17 @@ class FirestoreService {
       // Use the document ID as the drink's name and the 'price' field for its price
       return snapshot.docs.map((doc) => Drink.fromFirestore(doc)).toList();
     } catch (e) {
-      print('Error fetching drinks: $e');
-      return []; // Handle the error appropriately
+      if (e is fs.FirebaseException && e.code == 'permission-denied') {
+        print('Lack of permissions for accessing drink prices.');
+      } else {
+        print('Error fetching drinks: $e');
+      }
+      return []; // Return an empty list to signify an error non-intrusively
     }
   }
 
-  Future<void> updateDrinkPrice(String drinkName, double newPrice, String pubId) async {
+  Future<void> updateDrinkPrice(
+      String drinkName, double newPrice, String pubId) async {
     await fs.FirebaseFirestore.instance
         .collection('pubData')
         .doc(pubId)
