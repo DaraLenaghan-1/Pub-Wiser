@@ -128,6 +128,13 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
                         title: Text(drink.name),
                         trailing: Text('€${drink.price.toStringAsFixed(2)}'),
                         onTap: () => _showUpdatePriceDialog(context, drink),
+                        subtitle: IconButton(
+                          icon: Icon(Icons.list),
+                          onPressed: () => _showPriceSuggestions(
+                              context,
+                              drink
+                                  .name), // pass the correct identifier for the drink
+                        ),
                       );
                     }).toList(),
                   );
@@ -171,5 +178,79 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
     } else {
       showToast(message: "No user logged in!");
     }
+  }
+
+  void _showPriceSuggestions(BuildContext context, String drinkId) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext bc) {
+        return Container(
+          child: Wrap(
+            children: <Widget>[
+              FutureBuilder<List<PriceSuggestion>>(
+                future: FirestoreService()
+                    .getPriceSuggestions(widget.pub.id, drinkId),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text("Error: ${snapshot.error}"));
+                  } else if (snapshot.hasData) {
+                    return ListView.builder(
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        var suggestion = snapshot.data![index];
+                        return ListTile(
+                          title: Text(
+                              '€${suggestion.suggestedPrice.toStringAsFixed(2)} by ${suggestion.userEmail}'),
+                          subtitle: Text('Votes: ${suggestion.votes}'),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.thumb_up),
+                                onPressed: () => voteOnSuggestion(widget.pub.id,
+                                    drinkId, suggestion.id, true),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.thumb_down),
+                                onPressed: () => voteOnSuggestion(widget.pub.id,
+                                    drinkId, suggestion.id, false),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      shrinkWrap:
+                          true, // Use this if inside a Column or similar
+                      physics:
+                          NeverScrollableScrollPhysics(), // Use this if have a fixed height
+                    );
+                  } else {
+                    return Center(child: Text("No suggestions available"));
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void voteOnSuggestion(
+      String pubId, String drinkId, String suggestionId, bool upvote) {
+    FirebaseFirestore.instance
+        .collection('pubData')
+        .doc(pubId)
+        .collection('drinkPrices')
+        .doc(drinkId)
+        .collection('PriceSuggestions')
+        .doc(suggestionId)
+        .update({'votes': FieldValue.increment(upvote ? 1 : -1)}).then((_) {
+      showToast(message: "Vote updated successfully!");
+    }).catchError((error) {
+      showToast(message: "Error updating vote: $error");
+    });
   }
 }

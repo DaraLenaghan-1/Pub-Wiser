@@ -85,4 +85,25 @@ class FirestoreService {
         .doc(drinkName)
         .update({'price': newPrice});
   }
+
+  Future<List<PriceSuggestion>> getPriceSuggestions(
+      String pubId, String drinkName) async {
+    try {
+      var snapshot = await fs.FirebaseFirestore.instance
+          .collection('pubData')
+          .doc(pubId)
+          .collection('drinkPrices')
+          .doc(drinkName)
+          .collection('PriceSuggestions')
+          .get();
+
+      return snapshot.docs
+          .map((doc) => PriceSuggestion.fromMap(
+              doc.data() as Map<String, dynamic>, doc.id))
+          .toList();
+    } catch (e) {
+      print("Error fetching price suggestions: $e");
+      return [];
+    }
+  }
 }

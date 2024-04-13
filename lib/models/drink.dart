@@ -5,36 +5,41 @@ class Drink {
   final double price;
   final List<PriceSuggestion> priceSuggestions;
 
-  Drink({required this.name, required this.price, this.priceSuggestions = const []});
+  Drink(
+      {required this.name,
+      required this.price,
+      this.priceSuggestions = const []});
 
   factory Drink.fromFirestore(DocumentSnapshot doc) {
-    var data = doc.data() as Map<String, dynamic>?; // Safely cast to Map with null check
+    var data = doc.data()
+        as Map<String, dynamic>?; // Safely cast to Map with null check
     if (data == null) {
       throw Exception("Document data is not available");
     }
     return Drink(
       name: doc.id,
       price: (data['price'] as num).toDouble(),
-      priceSuggestions: data['priceSuggestions'] != null 
-        ? (data['priceSuggestions'] as List<dynamic>)
-            .map((s) => PriceSuggestion.fromMap(s as Map<String, dynamic>))
-            .toList()
-        : [],
+      priceSuggestions: data['priceSuggestions'] != null
+          ? (data['priceSuggestions'] as List<dynamic>)
+              .map((s) => PriceSuggestion.fromMap(s as Map<String, dynamic>,
+                  doc.id)) // Assume doc.id if suitable or adjust accordingly
+              .toList()
+          : [],
     );
   }
 }
 
-
-
 // Define a PriceSuggestion class to handle the structure of each price suggestion
 class PriceSuggestion {
+  String id;
   final String userId;
   final String userEmail;
   final double suggestedPrice;
   final Timestamp timestamp;
-  final int votes;
+  int votes;
 
   PriceSuggestion({
+    required this.id,
     required this.userId,
     required this.userEmail,
     required this.suggestedPrice,
@@ -42,9 +47,9 @@ class PriceSuggestion {
     this.votes = 0,
   });
 
-  // Factory method to create PriceSuggestion from a Map (from Firestore)
-  factory PriceSuggestion.fromMap(Map<String, dynamic> map) {
+  factory PriceSuggestion.fromMap(Map<String, dynamic> map, String docId) {
     return PriceSuggestion(
+      id: docId,
       userId: map['userId'],
       userEmail: map['userEmail'],
       suggestedPrice: (map['suggestedPrice'] as num).toDouble(),
@@ -53,7 +58,6 @@ class PriceSuggestion {
     );
   }
 
-  // Method to convert a PriceSuggestion to a Map, useful for uploading to Firestore
   Map<String, dynamic> toMap() {
     return {
       'userId': userId,
@@ -62,5 +66,14 @@ class PriceSuggestion {
       'timestamp': timestamp,
       'votes': votes,
     };
+  }
+
+  // Function to increment vote count
+  void upvote() {
+    votes++;
+  }
+
+  void downvote() {
+    votes--;
   }
 }
