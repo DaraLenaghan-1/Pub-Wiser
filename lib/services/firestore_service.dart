@@ -106,4 +106,38 @@ class FirestoreService {
       return [];
     }
   }
+
+  // Method to get the top price suggestion based on votes
+  Future<PriceSuggestion?> getTopPriceSuggestion(
+      String pubId, String drinkName) async {
+    try {
+      var snapshot = await _firestore
+          .collection('pubData')
+          .doc(pubId)
+          .collection('drinkPrices')
+          .doc(drinkName)
+          .collection('PriceSuggestions')
+          .orderBy('votes', descending: true)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        var data = snapshot.docs.first.data();
+        return PriceSuggestion.fromMap(data, snapshot.docs.first.id);
+      }
+      return null;
+    } catch (e) {
+      print("Error fetching top price suggestion: $e");
+      return null;
+    }
+  }
+
+  // Method to update the drink's price with the top voted price suggestion
+  Future<void> updateDrinkPriceWithTopSuggestion(
+      String pubId, String drinkName) async {
+    var topSuggestion = await getTopPriceSuggestion(pubId, drinkName);
+    if (topSuggestion != null) {
+      await updateDrinkPrice(drinkName, topSuggestion.suggestedPrice, pubId);
+    }
+  }
 }

@@ -120,7 +120,17 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return CircularProgressIndicator();
                 } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
+                  print(
+                      "Snapshot error: ${snapshot.error}"); // Logging the error
+                  return Center(
+                      child: Text(
+                          "Error: ${snapshot.error.toString()}")); // Displaying error message
+                } else if (snapshot.hasData && snapshot.data!.isEmpty) {
+                  print(
+                      "Data fetched, but no items found."); // Log empty data situation
+                  return Center(
+                      child: Text(
+                          "No drinks found")); // Informing user there are no drinks
                 } else if (snapshot.hasData) {
                   return Column(
                     children: snapshot.data!.map((drink) {
@@ -142,7 +152,8 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
                     }).toList(),
                   );
                 } else {
-                  return Text('No drinks found');
+                  return Text(
+                      'Unable to load drinks'); // Handling unexpected no data scenario
                 }
               },
             )
@@ -156,13 +167,14 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
       String pubId, String drinkName, double newPrice) async {
     var currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
-      // Construct the document ID based on user and current timestamp
       String docId =
           "${currentUser.uid}_${Timestamp.now().millisecondsSinceEpoch}";
+      String username = currentUser.displayName ??
+          "Unknown User"; // Use username instead of email for privacy
 
       var newSuggestion = {
         "userId": currentUser.uid,
-        "userEmail": currentUser.email!,
+        "username": username, // Store username instead of userEmail
         "suggestedPrice": newPrice,
         "timestamp": Timestamp.now(),
         "votes": 0,
@@ -174,7 +186,7 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
           .collection('drinkPrices')
           .doc(drinkName)
           .collection('PriceSuggestions')
-          .doc(docId) // Use the custom document ID
+          .doc(docId)
           .set(newSuggestion);
 
       showToast(message: "Price suggestion added successfully!");
@@ -195,40 +207,43 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text("Error: ${snapshot.error}"));
-              } else if (snapshot.hasData) {
-                snapshot.data!.sort((a, b) => b.timestamp.compareTo(
-                    a.timestamp)); // Sorting to show the most recent first
-                return ListView.builder(
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    var suggestion = snapshot.data![index];
-                    return ListTile(
-                      title: Text(
-                          '€${suggestion.suggestedPrice.toStringAsFixed(2)} by ${suggestion.userEmail}'),
-                      subtitle: Text('Votes: ${suggestion.votes}'),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: Icon(Icons.thumb_up),
-                            onPressed: () => voteOnSuggestion(
-                                widget.pub.id, drinkId, suggestion.id, true),
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.thumb_down),
-                            onPressed: () => voteOnSuggestion(
-                                widget.pub.id, drinkId, suggestion.id, false),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              } else {
-                return Center(child: Text("No suggestions available"));
               }
+              if (snapshot.hasError || snapshot.data == null) {
+                print("Error fetching data: ${snapshot.error}");
+                return Center(
+                    child:
+                        Text("Failed to load suggestions, please try again."));
+              }
+              var suggestions = snapshot.data!;
+              if (suggestions.isEmpty) {
+                return Center(child: Text("No price suggestions available."));
+              }
+              return ListView.builder(
+                itemCount: suggestions.length,
+                itemBuilder: (context, index) {
+                  var suggestion = suggestions[index];
+                  return ListTile(
+                    title: Text(
+                        '€${suggestion.suggestedPrice.toStringAsFixed(2)} by ${suggestion.userEmail}'),
+                    subtitle: Text('Votes: ${suggestion.votes}'),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.thumb_up),
+                          onPressed: () => voteOnSuggestion(
+                              widget.pub.id, drinkId, suggestion.id, true),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.thumb_down),
+                          onPressed: () => voteOnSuggestion(
+                              widget.pub.id, drinkId, suggestion.id, false),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
             },
           ),
         );
@@ -247,8 +262,58 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
         .doc(suggestionId)
         .update({'votes': FieldValue.increment(upvote ? 1 : -1)}).then((_) {
       showToast(message: "Vote updated successfully!");
+      Navigator.pop(context); // This line closes the modal before reopening
+      _showPriceSuggestions(
+          context, drinkId); // Reopen the modal with updated data
     }).catchError((error) {
       showToast(message: "Error updating vote: $error");
+      print(error);
     });
+  }
+
+  Future<PriceSuggestion?> getTopPriceSuggestion(
+      String pubId, String drinkName) async {
+    try {
+      var snapshot = await FirebaseFirestore.instance
+          .collection('pubData')
+          .doc(pubId)
+          .collection('drinkPrices')
+          .doc(drinkName)
+          .collection('PriceSuggestions')
+          .orderBy('votes', descending: true)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        return PriceSuggestion.fromMap(
+            snapshot.docs.first.data() as Map<String, dynamic>,
+            snapshot.docs.first.id);
+      }
+      return null;
+    } catch (e) {
+      print("Error fetching top price suggestion: $e");
+      return null;
+    }
+  }
+
+  void updateDrinkWithTopSuggestion(String pubId, String drinkName) async {
+    final topSuggestion = await getTopPriceSuggestion(pubId, drinkName);
+    if (topSuggestion != null) {
+      await FirebaseFirestore.instance
+          .collection('pubData')
+          .doc(pubId)
+          .collection('drinkPrices')
+          .doc(drinkName)
+          .update({'price': topSuggestion.suggestedPrice}).then((_) {
+        // Trigger a UI update to reflect the new price
+        setState(() {
+          _drinksFuture = FirestoreService().getDrinkPrices(widget.pub.id);
+        });
+        showToast(message: "Price updated to top suggestion.");
+      }).catchError((error) {
+        showToast(message: "Error updating price: $error");
+        print(error);
+      });
+    }
   }
 }

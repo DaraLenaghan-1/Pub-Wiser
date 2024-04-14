@@ -1,14 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 class Drink {
   final String name;
   final double price;
-  final List<PriceSuggestion> priceSuggestions;
 
-  Drink(
-      {required this.name,
-      required this.price,
-      this.priceSuggestions = const []});
+  Drink({
+    required this.name,
+    required this.price,
+  });
 
   factory Drink.fromFirestore(DocumentSnapshot doc) {
     var data = doc.data()
@@ -19,12 +19,6 @@ class Drink {
     return Drink(
       name: doc.id,
       price: (data['price'] as num).toDouble(),
-      priceSuggestions: data['priceSuggestions'] != null
-          ? (data['priceSuggestions'] as List<dynamic>)
-              .map((s) => PriceSuggestion.fromMap(s as Map<String, dynamic>,
-                  doc.id)) // Assume doc.id if suitable or adjust accordingly
-              .toList()
-          : [],
     );
   }
 }
@@ -48,10 +42,20 @@ class PriceSuggestion {
   });
 
   factory PriceSuggestion.fromMap(Map<String, dynamic> map, String docId) {
+    if (map['userId'] == null ||
+        map['suggestedPrice'] == null ||
+        map['timestamp'] == null) {
+      throw FlutterError(
+          'Required fields are missing for a PriceSuggestion instance');
+    }
+
+    // Provide a default value for userEmail if not present
+    String userEmail = map['userEmail'] ?? 'unknown@example.com';
+
     return PriceSuggestion(
       id: docId,
       userId: map['userId'],
-      userEmail: map['userEmail'],
+      userEmail: userEmail,
       suggestedPrice: (map['suggestedPrice'] as num).toDouble(),
       timestamp: map['timestamp'],
       votes: map['votes'] ?? 0,
