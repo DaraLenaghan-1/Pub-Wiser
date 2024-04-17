@@ -169,15 +169,13 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
     if (currentUser != null) {
       String docId =
           "${currentUser.uid}_${Timestamp.now().millisecondsSinceEpoch}";
-      String username = currentUser.displayName ??
-          "Unknown User"; // Use username instead of email for privacy
-
+      String username = currentUser.displayName ?? "Unknown User";
       var newSuggestion = {
         "userId": currentUser.uid,
-        "username": username, // Store username instead of userEmail
+        "username": username,
         "suggestedPrice": newPrice,
         "timestamp": Timestamp.now(),
-        "votes": 0,
+        "votes": 0
       };
 
       await FirebaseFirestore.instance
@@ -190,6 +188,7 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
           .set(newSuggestion);
 
       showToast(message: "Price suggestion added successfully!");
+      updateIfNeededAfterChange(pubId, drinkName);
     } else {
       showToast(message: "No user logged in!");
     }
@@ -197,26 +196,47 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
 
   void voteOnSuggestion(
       String pubId, String drinkId, String suggestionId, bool upvote) async {
-    try {
-      // Update the votes for the suggestion
-      await FirebaseFirestore.instance
+    await FirebaseFirestore.instance
+        .collection('pubData')
+        .doc(pubId)
+        .collection('drinkPrices')
+        .doc(drinkId)
+        .collection('PriceSuggestions')
+        .doc(suggestionId)
+        .update({'votes': FieldValue.increment(upvote ? 1 : -1)});
+
+    showToast(message: "Vote updated successfully!");
+    updateIfNeededAfterChange(pubId, drinkId);
+  }
+
+// This method checks if an update to the displayed price is needed after any change
+  Future<void> updateIfNeededAfterChange(String pubId, String drinkName) async {
+    var currentTopSuggestion = await getTopPriceSuggestion(pubId, drinkName);
+    if (currentTopSuggestion != null) {
+      DocumentSnapshot drinkSnapshot = await FirebaseFirestore.instance
           .collection('pubData')
           .doc(pubId)
           .collection('drinkPrices')
-          .doc(drinkId)
-          .collection('PriceSuggestions')
-          .doc(suggestionId)
-          .update({'votes': FieldValue.increment(upvote ? 1 : -1)});
-      showToast(message: "Vote updated successfully!");
+          .doc(drinkName)
+          .get();
 
-      // Close the modal before showing the updated one
-      Navigator.of(context).pop();
-
-      // Now, reopen the modal with updated data
-      _showPriceSuggestions(context, drinkId);
-    } catch (error) {
-      showToast(message: "Error updating vote: $error");
-      print(error);
+      if (drinkSnapshot.exists) {
+        Map<String, dynamic>? data =
+            drinkSnapshot.data() as Map<String, dynamic>?;
+        double currentPrice = (data?['price'] as num?)?.toDouble() ?? 0;
+        if (currentPrice != currentTopSuggestion.suggestedPrice) {
+          await FirebaseFirestore.instance
+              .collection('pubData')
+              .doc(pubId)
+              .collection('drinkPrices')
+              .doc(drinkName)
+              .update({'price': currentTopSuggestion.suggestedPrice});
+          showToast(
+              message:
+                  "Price updated to €${currentTopSuggestion.suggestedPrice.toStringAsFixed(2)}");
+          refreshDrinkPrices();
+        }
+      }
     }
   }
 
@@ -339,6 +359,35 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
     } catch (error) {
       showToast(message: "Error updating price: $error");
       print(error);
+    }
+  }
+
+  Future<void> updateDrinkPriceIfNeeded(
+      String pubId, String drinkId, PriceSuggestion topSuggestion) async {
+    DocumentSnapshot drinkSnapshot = await FirebaseFirestore.instance
+        .collection('pubData')
+        .doc(pubId)
+        .collection('drinkPrices')
+        .doc(drinkId)
+        .get();
+
+    if (drinkSnapshot.exists) {
+      Map<String, dynamic>? data =
+          drinkSnapshot.data() as Map<String, dynamic>?;
+      double currentPrice = (data?['price'] as num?)?.toDouble() ?? 0;
+      // Only update if the current price does not match the top suggestion's price
+      if (currentPrice != topSuggestion.suggestedPrice) {
+        await FirebaseFirestore.instance
+            .collection('pubData')
+            .doc(pubId)
+            .collection('drinkPrices')
+            .doc(drinkId)
+            .update({'price': topSuggestion.suggestedPrice});
+        showToast(
+            message:
+                "Price updated to €${topSuggestion.suggestedPrice.toStringAsFixed(2)}");
+        refreshDrinkPrices();
+      }
     }
   }
 
