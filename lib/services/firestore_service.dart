@@ -89,12 +89,13 @@ class FirestoreService {
   Future<List<PriceSuggestion>> getPriceSuggestions(
       String pubId, String drinkName) async {
     try {
-      var snapshot = await fs.FirebaseFirestore.instance
+      var snapshot = await _firestore
           .collection('pubData')
           .doc(pubId)
           .collection('drinkPrices')
           .doc(drinkName)
           .collection('PriceSuggestions')
+          .orderBy('timestamp', descending: true) // Order by timestamp
           .get();
 
       return snapshot.docs
@@ -136,8 +137,8 @@ class FirestoreService {
   Future<void> updateDrinkPriceWithTopSuggestion(
       String pubId, String drinkName) async {
     var topSuggestion = await getTopPriceSuggestion(pubId, drinkName);
-    if (topSuggestion != null) {
-      await updateDrinkPrice(drinkName, topSuggestion.suggestedPrice, pubId);
+    if (topSuggestion != null && topSuggestion.votes > 0) {
+      return updateDrinkPrice(drinkName, topSuggestion.suggestedPrice, pubId);
     }
   }
 }

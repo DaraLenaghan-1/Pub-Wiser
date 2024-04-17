@@ -195,6 +195,31 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
     }
   }
 
+  void voteOnSuggestion(
+      String pubId, String drinkId, String suggestionId, bool upvote) async {
+    try {
+      // Update the votes for the suggestion
+      await FirebaseFirestore.instance
+          .collection('pubData')
+          .doc(pubId)
+          .collection('drinkPrices')
+          .doc(drinkId)
+          .collection('PriceSuggestions')
+          .doc(suggestionId)
+          .update({'votes': FieldValue.increment(upvote ? 1 : -1)});
+      showToast(message: "Vote updated successfully!");
+
+      // Close the modal before showing the updated one
+      Navigator.of(context).pop();
+
+      // Now, reopen the modal with updated data
+      _showPriceSuggestions(context, drinkId);
+    } catch (error) {
+      showToast(message: "Error updating vote: $error");
+      print(error);
+    }
+  }
+
   void _showPriceSuggestions(BuildContext context, String drinkId) {
     showModalBottomSheet(
       context: context,
@@ -248,26 +273,12 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
           ),
         );
       },
-    );
-  }
-
-  void voteOnSuggestion(
-      String pubId, String drinkId, String suggestionId, bool upvote) {
-    FirebaseFirestore.instance
-        .collection('pubData')
-        .doc(pubId)
-        .collection('drinkPrices')
-        .doc(drinkId)
-        .collection('PriceSuggestions')
-        .doc(suggestionId)
-        .update({'votes': FieldValue.increment(upvote ? 1 : -1)}).then((_) {
-      showToast(message: "Vote updated successfully!");
-      Navigator.pop(context); // This line closes the modal before reopening
-      _showPriceSuggestions(
-          context, drinkId); // Reopen the modal with updated data
-    }).catchError((error) {
-      showToast(message: "Error updating vote: $error");
-      print(error);
+    ).then((_) {
+      // After modal is dismissed, update the price to top voted suggestion
+      updateDrinkWithTopSuggestion(widget.pub.id, drinkId).then((_) {
+        // Refresh drink prices on the main page
+        refreshDrinkPrices();
+      });
     });
   }
 
@@ -296,24 +307,44 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
     }
   }
 
-  void updateDrinkWithTopSuggestion(String pubId, String drinkName) async {
-    final topSuggestion = await getTopPriceSuggestion(pubId, drinkName);
-    if (topSuggestion != null) {
-      await FirebaseFirestore.instance
-          .collection('pubData')
-          .doc(pubId)
-          .collection('drinkPrices')
-          .doc(drinkName)
-          .update({'price': topSuggestion.suggestedPrice}).then((_) {
-        // Trigger a UI update to reflect the new price
-        setState(() {
-          _drinksFuture = FirestoreService().getDrinkPrices(widget.pub.id);
-        });
+  Future<void> updateDrinkWithTopSuggestion(
+      String pubId, String drinkName) async {
+    try {
+      // Fetch the top price suggestion
+      final topSuggestion = await getTopPriceSuggestion(pubId, drinkName);
+
+      // Check if there's a valid suggestion to set the price to
+      if (topSuggestion != null && topSuggestion.votes >= 0) {
+        // Update the drink price with the top suggestion's price
+        await FirebaseFirestore.instance
+            .collection('pubData')
+            .doc(pubId)
+            .collection('drinkPrices')
+            .doc(drinkName)
+            .update({'price': topSuggestion.suggestedPrice});
         showToast(message: "Price updated to top suggestion.");
-      }).catchError((error) {
-        showToast(message: "Error updating price: $error");
-        print(error);
-      });
+      }
+    } catch (error) {
+      showToast(message: "Error updating price to top suggestion: $error");
+      print(error);
     }
+  }
+
+  void updatePriceToTopSuggestion(String pubId, String drinkName) async {
+    try {
+      await FirestoreService()
+          .updateDrinkPriceWithTopSuggestion(pubId, drinkName);
+      showToast(message: "Price updated to top voted suggestion.");
+      refreshDrinkPrices(); // Call a method that refreshes the drink prices
+    } catch (error) {
+      showToast(message: "Error updating price: $error");
+      print(error);
+    }
+  }
+
+  void refreshDrinkPrices() {
+    setState(() {
+      _drinksFuture = FirestoreService().getDrinkPrices(widget.pub.id);
+    });
   }
 }
