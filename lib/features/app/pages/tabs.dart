@@ -8,7 +8,7 @@ import 'package:first_app/features/app/pages/home_page.dart';
 import 'package:first_app/models/pub.dart';
 
 class TabsPage extends ConsumerStatefulWidget {
-  const TabsPage({Key? key}) : super(key: key);
+  const TabsPage({super.key});
 
   @override
   _TabsPageState createState() => _TabsPageState();

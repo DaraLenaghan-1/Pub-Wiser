@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:first_app/services/google_places_client.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,7 +15,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Location _locationController = new Location();
+  GooglePlacesClient placesClient = GooglePlacesClient();
+
+  final Location _locationController = Location();
   StreamSubscription<LocationData>? _locationSubscription;
 
   final Completer<GoogleMapController> _mapController =
@@ -24,14 +27,16 @@ class _HomePageState extends State<HomePage> {
       LatLng(53.27453804687606, -9.049238146120606); //position of Galway City
   static const LatLng _pGalwayCitySpanishArch =
       LatLng(53.27022682627128, -9.053970096184496); //position of spanish arch
-  LatLng? _currentPosition = null;
+  LatLng? _currentPosition;
 
-  Map<PolylineId, Polyline> _polylines = {};
+  final Map<PolylineId, Polyline> _polylines = {};
+  final Set<Marker> _markers = {};
 
   @override
   void initState() {
     super.initState();
     getLocationUpdates();
+    fetchBarsAndDisplay();
   }
 
   @override
@@ -51,21 +56,8 @@ class _HomePageState extends State<HomePage> {
               onMapCreated: ((GoogleMapController controller) =>
                   _mapController.complete(controller)),
               initialCameraPosition:
-                  CameraPosition(target: _pGalwayCity, zoom: 14),
-              markers: {
-                Marker(
-                    markerId: MarkerId('_currentLocation'),
-                    position: _currentPosition!),
-                Marker(
-                    markerId: MarkerId('_sourceLocation'),
-                    position: _pGalwayCitySpanishArch),
-                Marker(
-                    markerId: MarkerId('_destination'), //_destination
-                    position: _pGalwayCity),
-                Marker(
-                    markerId: MarkerId('_sourceLocation'),
-                    position: _pGalwayCitySpanishArch)
-              },
+                  const CameraPosition(target: _pGalwayCity, zoom: 14),
+              markers: _markers,
               polylines: Set<Polyline>.of(_polylines.values),
             ),
     );
@@ -73,28 +65,28 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _goToCamPosition(LatLng position) async {
     final GoogleMapController controller = await _mapController.future;
-    CameraPosition _newCamPosition = CameraPosition(target: position, zoom: 14);
+    CameraPosition newCamPosition = CameraPosition(target: position, zoom: 14);
     await controller.animateCamera(
-      CameraUpdate.newCameraPosition(_newCamPosition),
+      CameraUpdate.newCameraPosition(newCamPosition),
     );
   }
 
   Future<void> getLocationUpdates() async {
-    bool _serviceEnabled;
-    PermissionStatus _permissionGranted;
+    bool serviceEnabled;
+    PermissionStatus permissionGranted;
 
-    _serviceEnabled = await _locationController.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await _locationController.requestService();
-      if (!_serviceEnabled) {
+    serviceEnabled = await _locationController.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await _locationController.requestService();
+      if (!serviceEnabled) {
         return;
       }
     }
 
-    _permissionGranted = await _locationController.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await _locationController.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
+    permissionGranted = await _locationController.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await _locationController.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
         return;
       }
     }
@@ -136,9 +128,9 @@ class _HomePageState extends State<HomePage> {
     );
 
     if (result.points.isNotEmpty) {
-      result.points.forEach((PointLatLng point) {
+      for (var point in result.points) {
         polylineCoordinates.add(LatLng(point.latitude, point.longitude));
-      });
+      }
     } else {
       print(result.errorMessage);
     }
@@ -146,7 +138,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void setPolylines(List<LatLng> polylineCoordinates) {
-    PolylineId id = PolylineId("poly");
+    PolylineId id = const PolylineId("poly");
     Polyline polyline = Polyline(
       polylineId: id,
       color: Colors.red,
@@ -155,6 +147,40 @@ class _HomePageState extends State<HomePage> {
     );
     setState(() {
       _polylines[id] = polyline;
+    });
+  }
+
+  void fetchBarsAndDisplay() async {
+    try {
+      var bars = await placesClient.fetchBars(
+          53.2745, -9.0493); // Coordinates for Galway City
+      updateMapMarkers(bars);
+    } catch (e) {
+      print('Error fetching bars: $e');
+    }
+  }
+
+  void updateMapMarkers(List<Place> bars) {
+    var newMarkers = <Marker>{};
+    for (var bar in bars) {
+      var markerId = MarkerId(bar.name);
+      var marker = Marker(
+        markerId: markerId,
+        position: LatLng(bar.latitude, bar.longitude),
+        infoWindow: InfoWindow(
+          title: bar.name,
+          snippet: 'Click for details',
+        ),
+        onTap: () {
+          // Handle marker tap, to show drink prices and more details
+          // This could open a modal or something similar with details about this bar
+        },
+      );
+      newMarkers.add(marker);
+    }
+    setState(() {
+      _markers.clear();
+      _markers.addAll(newMarkers);
     });
   }
 }

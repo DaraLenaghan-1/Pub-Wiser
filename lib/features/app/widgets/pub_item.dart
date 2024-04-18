@@ -4,10 +4,10 @@ import 'package:transparent_image/transparent_image.dart';
 
 class PubItem extends StatelessWidget {
   const PubItem({
-    Key? key,
+    super.key,
     required this.pub,
     required this.onSelectPub,
-  }) : super(key: key);
+  });
 
   final Pub pub;
   final Function(BuildContext context, Pub) onSelectPub;

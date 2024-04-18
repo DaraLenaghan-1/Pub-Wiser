@@ -10,16 +10,16 @@ import 'package:google_fonts/google_fonts.dart';
 
 final theme = ThemeData(
   useMaterial3: true,
-  colorScheme: ColorScheme.light(
+  colorScheme: const ColorScheme.light(
     primary:
-        const Color(0xFF14213D), // Dark blue, used for interactive elements
+        Color(0xFF14213D), // Dark blue, used for interactive elements
     onPrimary: Colors.white, // For legibility on primary color
-    secondary: const Color(0xFFFCA311), // Orange, used for secondary accents
+    secondary: Color(0xFFFCA311), // Orange, used for secondary accents
     onSecondary: Colors.black, // For legibility on secondary color
     background:
-        const Color(0xFFFFFFFF), // White background for general app usage
+        Color(0xFFFFFFFF), // White background for general app usage
     onBackground: Colors.black, // For legibility on background color
-    surface: const Color(0xFFE5E5E5), // Light gray for cards and UI surfaces
+    surface: Color(0xFFE5E5E5), // Light gray for cards and UI surfaces
     onSurface: Colors.black, // For legibility on surface color
     error: Colors.redAccent, // Red for error states
     onError: Colors.white, // White on error states for legibility
@@ -40,15 +40,15 @@ Future main() async {
   }
 
   runApp(
-    ProviderScope(
+    const ProviderScope(
       // Wrapped app with ProviderScope
-      child: const MyApp(),
+      child: MyApp(),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {

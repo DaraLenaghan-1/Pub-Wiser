@@ -16,7 +16,7 @@ class FormContainerWidget extends StatefulWidget {
 
   const FormContainerWidget({
     //paramaters
-    Key? key,
+    super.key,
     required this.controller,
     this.isPasswordField = false,
     this.fieldKey,
@@ -27,7 +27,7 @@ class FormContainerWidget extends StatefulWidget {
     this.validator,
     this.onFieldSubmitted,
     this.inputType,
-  }) : super(key: key);
+  });
 
   @override
   // ignore: library_private_types_in_public_api

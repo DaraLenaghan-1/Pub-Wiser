@@ -50,7 +50,7 @@ class MainDrawer extends ConsumerWidget {
             title: Text('Filters', style: Theme.of(context).textTheme.titleSmall!.copyWith(fontSize: 24)),
             onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const FiltersPage())),
           ),
-          Spacer(),
+          const Spacer(),
           ListTile(
             leading: Icon(Icons.exit_to_app, size: 26, color: Theme.of(context).colorScheme.error),
             title: Text('Sign Out', style: Theme.of(context).textTheme.titleSmall!.copyWith(fontSize: 24)),

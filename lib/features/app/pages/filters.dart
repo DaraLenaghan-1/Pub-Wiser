@@ -4,13 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:first_app/models/filter_enum.dart';
 
 class FiltersPage extends ConsumerWidget {
-  const FiltersPage({Key? key}) : super(key: key);
+  const FiltersPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     Map<Filter, bool> filters = ref.watch(filterProvider);
 
-    void _handleFilterChange(Filter filter, bool isChecked) {
+    void handleFilterChange(Filter filter, bool isChecked) {
       ref.read(filterProvider.notifier).updateFilter(filter, isChecked);
     }
 
@@ -34,7 +34,7 @@ class FiltersPage extends ConsumerWidget {
             subtitle: Text('Only show pubs with $title'),
             value: filters[filter] ?? false,
             onChanged: (bool value) {
-              _handleFilterChange(filter, value);
+              handleFilterChange(filter, value);
             },
           );
         }).toList(),

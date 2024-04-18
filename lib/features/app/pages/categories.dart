@@ -9,10 +9,10 @@ import 'package:first_app/models/pub.dart';
 
 class CategoriesScreen extends ConsumerWidget {
   const CategoriesScreen({
-    Key? key,
+    super.key,
     required this.onToggleFavourite,
     required this.availableCategories,
-  }) : super(key: key);
+  });
 
   final void Function(Pub pub) onToggleFavourite;
   final List<Pub> availableCategories;

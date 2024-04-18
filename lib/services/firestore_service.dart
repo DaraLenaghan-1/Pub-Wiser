@@ -100,7 +100,7 @@ class FirestoreService {
 
       return snapshot.docs
           .map((doc) => PriceSuggestion.fromMap(
-              doc.data() as Map<String, dynamic>, doc.id))
+              doc.data(), doc.id))
           .toList();
     } catch (e) {
       print("Error fetching price suggestions: $e");

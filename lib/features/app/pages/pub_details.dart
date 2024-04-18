@@ -8,10 +8,10 @@ import 'package:first_app/services/firestore_service.dart';
 
 class PubDetailsPage extends StatefulWidget {
   const PubDetailsPage({
-    Key? key,
+    super.key,
     required this.pub,
     required this.onToggleFavourite,
-  }) : super(key: key);
+  });
 
   final Pub pub;
   final void Function(Pub) onToggleFavourite;
@@ -31,7 +31,7 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
   }
 
   Future<void> _showUpdatePriceDialog(BuildContext context, Drink drink) async {
-    TextEditingController _priceController =
+    TextEditingController priceController =
         TextEditingController(text: drink.price.toString());
 
     return showDialog<void>(
@@ -41,25 +41,25 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
         return AlertDialog(
           title: Text('Update Price for ${drink.name}'),
           content: TextField(
-            controller: _priceController,
+            controller: priceController,
             autofocus: true,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'New Price',
               hintText: 'e.g. 5.75',
             ),
-            keyboardType: TextInputType.numberWithOptions(decimal: true),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Update'),
+              child: const Text('Update'),
               onPressed: () {
-                double? newPrice = double.tryParse(_priceController.text);
+                double? newPrice = double.tryParse(priceController.text);
                 if (newPrice != null) {
                   FirestoreService()
                       .updateDrinkPrice(drink.name, newPrice, widget.pub.id)
@@ -106,19 +106,19 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
               width: double.infinity,
               fit: BoxFit.cover,
             ),
-            SizedBox(height: 14),
+            const SizedBox(height: 14),
             Text(
               widget.pub.description,
               style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                     color: Theme.of(context).colorScheme.onBackground,
                   ),
             ),
-            SizedBox(height: 14),
+            const SizedBox(height: 14),
             FutureBuilder<List<Drink>>(
               future: _drinksFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
+                  return const CircularProgressIndicator();
                 } else if (snapshot.hasError) {
                   print(
                       "Snapshot error: ${snapshot.error}"); // Logging the error
@@ -128,7 +128,7 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
                 } else if (snapshot.hasData && snapshot.data!.isEmpty) {
                   print(
                       "Data fetched, but no items found."); // Log empty data situation
-                  return Center(
+                  return const Center(
                       child: Text(
                           "No drinks found")); // Informing user there are no drinks
                 } else if (snapshot.hasData) {
@@ -142,7 +142,7 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
-                              icon: Icon(Icons.list),
+                              icon: const Icon(Icons.list),
                               onPressed: () =>
                                   _showPriceSuggestions(context, drink.name),
                             ),
@@ -152,7 +152,7 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
                     }).toList(),
                   );
                 } else {
-                  return Text(
+                  return const Text(
                       'Unable to load drinks'); // Handling unexpected no data scenario
                 }
               },
@@ -245,23 +245,23 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
       context: context,
       builder: (BuildContext bc) {
         return Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           child: FutureBuilder<List<PriceSuggestion>>(
             future:
                 FirestoreService().getPriceSuggestions(widget.pub.id, drinkId),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
+                return const Center(child: CircularProgressIndicator());
               }
               if (snapshot.hasError || snapshot.data == null) {
                 print("Error fetching data: ${snapshot.error}");
-                return Center(
+                return const Center(
                     child:
                         Text("Failed to load suggestions, please try again."));
               }
               var suggestions = snapshot.data!;
               if (suggestions.isEmpty) {
-                return Center(child: Text("No price suggestions available."));
+                return const Center(child: Text("No price suggestions available."));
               }
               return ListView.builder(
                 itemCount: suggestions.length,
@@ -275,12 +275,12 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: Icon(Icons.thumb_up),
+                          icon: const Icon(Icons.thumb_up),
                           onPressed: () => voteOnSuggestion(
                               widget.pub.id, drinkId, suggestion.id, true),
                         ),
                         IconButton(
-                          icon: Icon(Icons.thumb_down),
+                          icon: const Icon(Icons.thumb_down),
                           onPressed: () => voteOnSuggestion(
                               widget.pub.id, drinkId, suggestion.id, false),
                         ),
@@ -317,7 +317,7 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
 
       if (snapshot.docs.isNotEmpty) {
         return PriceSuggestion.fromMap(
-            snapshot.docs.first.data() as Map<String, dynamic>,
+            snapshot.docs.first.data(),
             snapshot.docs.first.id);
       }
       return null;

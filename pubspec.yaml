@@ -31,21 +31,21 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core: ^2.30.0
-  cloud_firestore: ^4.17.0
-  firebase_auth: ^4.19.2
-  firebase_storage: ^11.7.2
-  fluttertoast: ^8.2.5
-  cupertino_icons: ^1.0.8
-  font_awesome_flutter: ^10.7.0
-  google_sign_in: ^6.2.1
+  firebase_core: ^2.21.0
+  cloud_firestore: ^4.12.2
+  firebase_auth: ^4.12.1
+  firebase_storage: ^11.4.1
+  fluttertoast: ^8.2.4
+  cupertino_icons: ^1.0.2
+  font_awesome_flutter: ^10.6.0
+  google_sign_in: ^6.1.5
   google_fonts: ^6.1.0
   transparent_image: ^2.0.1
-  google_maps_flutter: ^2.6.1
-  location: ^6.0.1
+  google_maps_flutter: ^2.6.0
+  location: ^5.0.3
   flutter_polyline_points: ^2.0.0
-  provider: ^6.0.2
   flutter_riverpod: ^2.5.1
+  googleapis: ^13.1.0
 
 # firebase_core: ^2.21.0
 # This is the core Firebase library. It is required to use any Firebase service in your Flutter application.
@@ -97,13 +97,14 @@ dependencies:
 # flutter_polyline_points: ^2.0.0
 # This is a Flutter plugin for polyline points. It allows you to decode and encode polylines in your Flutter app.
 
-# provider: ^6.0.2
-# This is a Flutter plugin for state management. It allows you to manage the state of your Flutter app.
-# It provides a set of helper widgets that allow you to use the Provider functionality in your Flutter app.
-
 # flutter_riverpod: ^2.5.1
 # This is a Flutter plugin for Riverpod. It allows you to manage the state of your Flutter app using Riverpod.
 # It provides a set of helper widgets that allow you to use the Riverpod functionality in your Flutter app.
+
+# googleapis: ^13.1.0
+# This is a Flutter plugin for Google APIs. It allows you to access Google APIs in your Flutter app.
+# It provides a set of helper widgets that allow you to use the Google APIs in your Flutter app.
+
 
 dev_dependencies:
   flutter_test:
