@@ -32,11 +32,14 @@ class _HomePageState extends State<HomePage> {
   final Map<PolylineId, Polyline> _polylines = {};
   final Set<Marker> _markers = {};
 
+  BitmapDescriptor? userLocationIcon;
+
   @override
   void initState() {
     super.initState();
     getLocationUpdates();
     fetchBarsAndDisplay();
+    loadCustomMarker();
   }
 
   @override
@@ -92,25 +95,25 @@ class _HomePageState extends State<HomePage> {
     }
 
     _locationSubscription = _locationController.onLocationChanged.listen(
-      (LocationData currentLocation) async {
+      (LocationData currentLocation) {
         if (!mounted) return;
-        if (currentLocation.latitude != null &&
-            currentLocation.longitude != null) {
-          // Update current position and camera position
-          if (!mounted) return;
+        double? lat = currentLocation.latitude;
+        double? lng = currentLocation.longitude;
+        if (lat != null && lng != null) {
+          LatLng newPosition = LatLng(lat, lng);
           setState(() {
-            _currentPosition =
-                LatLng(currentLocation.latitude!, currentLocation.longitude!);
+            _currentPosition = newPosition;
+            // Update or add the user location marker
+            _markers.removeWhere(
+                (m) => m.markerId == const MarkerId('_currentLocation'));
+            _markers.add(Marker(
+              markerId: const MarkerId('_currentLocation'),
+              position: newPosition,
+              icon: userLocationIcon ?? BitmapDescriptor.defaultMarker,
+              infoWindow: const InfoWindow(title: 'Your Location'),
+            ));
           });
-          _goToCamPosition(_currentPosition!);
-
-          // Fetch and set polyline
-          try {
-            List<LatLng> polylineCoordinates = await getPolyline();
-            setPolylines(polylineCoordinates);
-          } catch (e) {
-            print("Failed to fetch polyline: $e");
-          }
+          //_goToCamPosition(newPosition); -- Uncomment this line to center the map on the user's location
         }
       },
     );
@@ -162,11 +165,25 @@ class _HomePageState extends State<HomePage> {
 
   void updateMapMarkers(List<Place> bars) {
     var newMarkers = <Marker>{};
+
+    // Adding a marker for the user's current location with a custom icon
+    if (_currentPosition != null) {
+      newMarkers.add(Marker(
+        markerId: const MarkerId('_currentLocation'),
+        position: _currentPosition!,
+        icon: userLocationIcon ??
+            BitmapDescriptor.defaultMarker, // Use custom icon if loaded
+        infoWindow: const InfoWindow(title: 'Your Location'),
+      ));
+    }
+
+    // Adding markers for the bars
     for (var bar in bars) {
       var markerId = MarkerId(bar.name);
       var marker = Marker(
         markerId: markerId,
         position: LatLng(bar.latitude, bar.longitude),
+        icon: BitmapDescriptor.defaultMarker, // Using default marker for bars
         infoWindow: InfoWindow(
           title: bar.name,
           snippet: 'Click for details',
@@ -178,9 +195,23 @@ class _HomePageState extends State<HomePage> {
       );
       newMarkers.add(marker);
     }
+
     setState(() {
       _markers.clear();
       _markers.addAll(newMarkers);
     });
+  }
+
+  void loadCustomMarker() async {
+    try {
+      userLocationIcon = await BitmapDescriptor.fromAssetImage(
+          ImageConfiguration(devicePixelRatio: 2.5),
+          'assets/user_location.png');
+      setState(() {
+        // Trigger a rebuild to update the map with the new icon
+      });
+    } catch (e) {
+      print('Failed to load user location icon: $e');
+    }
   }
 }
