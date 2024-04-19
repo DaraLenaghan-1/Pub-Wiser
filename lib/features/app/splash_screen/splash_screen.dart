@@ -1,4 +1,3 @@
-//import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -14,22 +13,20 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     Future.delayed(const Duration(seconds: 3), () {
       Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => widget.child!),
-          (route) => false);
+        context,
+        MaterialPageRoute(builder: (context) => widget.child!),
+        (route) => false,
+      );
     });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Center(
-        child: Text('Pub Wiser',
-            style: TextStyle(
-              color: Colors.blue,
-              fontWeight: FontWeight.bold,
-            )),
+        // Replace 'assets/pub_wiser_logo.png' with the correct asset path
+        child: Image.asset('assets/pub_wiser_logo.jpg'),
       ),
     );
   }

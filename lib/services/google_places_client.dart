@@ -28,14 +28,20 @@ class Place {
   final String name;
   final double latitude;
   final double longitude;
+  final String? imageUrl;
+  final String? description;
 
-  Place({required this.name, required this.latitude, required this.longitude});
+  Place({required this.name, required this.latitude, required this.longitude, this.imageUrl,
+    this.description,});
 
   factory Place.fromMap(Map<String, dynamic> map) {
     return Place(
       name: map['name'],
       latitude: map['geometry']['location']['lat'],
       longitude: map['geometry']['location']['lng'],
+      imageUrl: map['icon'],  // Assuming 'icon' field is used for image URL
+      description: "Sample description",
+      
     );
   }
 }

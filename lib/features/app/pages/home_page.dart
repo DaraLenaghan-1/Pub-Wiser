@@ -181,21 +181,52 @@ class _HomePageState extends State<HomePage> {
     for (var bar in bars) {
       var markerId = MarkerId(bar.name);
       var marker = Marker(
-        markerId: markerId,
-        position: LatLng(bar.latitude, bar.longitude),
-        icon: BitmapDescriptor.defaultMarker, // Using default marker for bars
-        infoWindow: InfoWindow(
-          title: bar.name,
-          snippet: 'Click for details',
-        ),
-        onTap: () {
-          // Handle marker tap, to show drink prices and more details
-          // This could open a modal or something similar with details about this bar
-        },
-      );
+          markerId: markerId,
+          position: LatLng(bar.latitude, bar.longitude),
+          icon: BitmapDescriptor.defaultMarker,
+          infoWindow: InfoWindow(
+            title: bar.name,
+            snippet: 'Click for details',
+          ),
+          onTap: () {
+            showModalBottomSheet<void>(
+              context: context,
+              isScrollControlled: false, // allows the modal to be full-screen
+              builder: (BuildContext context) {
+                return DraggableScrollableSheet(
+                  initialChildSize:
+                      0.25, // 25% of the screen height when opened
+                  minChildSize:
+                      0.25, // Minimum size of the bottom sheet when opened
+                  maxChildSize:
+                      1, // It will cover the whole screen when user drags upwards
+                  builder: (BuildContext context,
+                      ScrollController scrollController) {
+                    return Container(
+                      // Apply your desired styling here
+                      child: ListView.builder(
+                        controller:
+                            scrollController, // Use the provided ScrollController
+                        itemCount:
+                            1, // Assuming you want to show only one item for now
+                        itemBuilder: (_, index) {
+                          return ListTile(
+                            title: Text(bar.name),
+                            subtitle: Text('Tap for details'),
+                            onTap: () {
+                              // Your code to navigate to the PubDetailsPage or expand the modal
+                            },
+                          );
+                        },
+                      ),
+                    );
+                  },
+                );
+              },
+            );
+          });
       newMarkers.add(marker);
     }
-
     setState(() {
       _markers.clear();
       _markers.addAll(newMarkers);
