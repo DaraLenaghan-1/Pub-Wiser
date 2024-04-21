@@ -181,68 +181,83 @@ class _HomePageState extends State<HomePage> {
     for (var bar in bars) {
       var markerId = MarkerId(bar.name);
       var marker = Marker(
-          markerId: markerId,
-          position: LatLng(bar.latitude, bar.longitude),
-          icon: BitmapDescriptor.defaultMarker,
-          infoWindow: InfoWindow(
-            title: bar.name,
-            snippet: 'Click for details',
-          ),
-          onTap: () {
+        markerId: markerId,
+        position: LatLng(bar.latitude, bar.longitude),
+        icon: BitmapDescriptor.defaultMarker,
+        infoWindow: InfoWindow(
+          title: bar.name,
+          snippet: 'Click for details',
+        ),
+        onTap: () async {
+          try {
+            // Fetch details for the selected place
+            var placeDetails =
+                await placesClient.fetchPlaceDetails(bar.placeId);
             showModalBottomSheet<void>(
               context: context,
-              isScrollControlled: false,
-              isDismissible: true,
+              isScrollControlled: true,
               backgroundColor: Colors.transparent,
-              barrierColor: Colors
-                  .transparent, // Ensure the dimming background is also transparent
               builder: (BuildContext context) {
                 return DraggableScrollableSheet(
-                  initialChildSize:
-                      0.25, // The initial size of the sheet when it's displayed.
-                  minChildSize:
-                      0.25, // The minimum size of the sheet when it's opened.
-                  maxChildSize:
-                      1.0, // The maximum size of the sheet when it's dragged upwards.
+                  initialChildSize: 0.25,
+                  minChildSize: 0.25,
+                  maxChildSize: 1.0,
                   builder: (BuildContext context,
                       ScrollController scrollController) {
                     return Container(
                       padding: EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors
-                            .white, // The color of the modal's content area.
-                        borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(
-                                20)), // Creates a rounded corner on the top edge of the modal.
+                        color: Colors.white,
+                        borderRadius:
+                            BorderRadius.vertical(top: Radius.circular(20)),
                       ),
-                      child: ListView(
-                        controller:
-                            scrollController, // Assign the provided ScrollController to the ListView.
-                        children: <Widget>[
-                          Center(
-                            child: Container(
-                              width: 40,
-                              height: 5,
-                              margin: EdgeInsets.symmetric(vertical: 10),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[
-                                    300], // The color of the drag handle indicator.
-                                borderRadius: BorderRadius.circular(10),
+                      child: ListView.builder(
+                        controller: scrollController,
+                        itemCount: 1,
+                        itemBuilder: (_, index) {
+                          return Column(
+                            children: <Widget>[
+                              Padding(
+                                padding: EdgeInsets.symmetric(vertical: 10),
+                                child: Text(bar.name,
+                                    style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold)),
                               ),
-                            ),
-                          ),
-                          Text(bar.name), // Display the name of the bar.
-                          // Include more widgets to display additional details like reviews, images, opening times, etc.
-                        ],
+                              Text(
+                                  'Address: ${placeDetails.address ?? "Not available"}'),
+                              Text(
+                                  'Phone: ${placeDetails.phoneNumber ?? "Not available"}'),
+                              Text(
+                                  'Rating: ${placeDetails.rating?.toString() ?? "Not rated"}'),
+                              if (placeDetails.reviews != null)
+                                ...placeDetails.reviews!
+                                    .map((review) => ListTile(
+                                          title: Text('Review'),
+                                          subtitle: Text(review),
+                                        )),
+                              // Display images if available
+                              if (placeDetails.photoReferences != null)
+                                ...placeDetails.photoReferences!
+                                    .map((photoRef) {
+                                  var photoUrl =
+                                      placeDetails.getPhotoUrl(photoRef);
+                                  return Image.network(photoUrl, height: 200);
+                                }),
+                            ],
+                          );
+                        },
                       ),
                     );
                   },
                 );
               },
             );
-
-            // End of showModalBottomSheet
-          });
+          } catch (e) {
+            print("Failed to fetch place details: $e");
+          }
+        },
+      );
       newMarkers.add(marker);
     }
     setState(() {

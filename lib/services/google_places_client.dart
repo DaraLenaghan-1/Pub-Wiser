@@ -13,6 +13,8 @@ class GooglePlacesClient {
         '$baseUrl?location=$latitude,$longitude&radius=$radius&type=bar&keyword=pub&key=$GOOGLE_MAPS_API_KEY';
 
     var response = await httpClient.get(Uri.parse(url));
+    print("API Response: ${response.body}");
+
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
       if (data['status'] == 'OK') {
@@ -99,31 +101,29 @@ class Place {
     );
   }
   factory Place.fromDetailMap(Map<String, dynamic> map) {
-    // Extract the necessary details from the details map.
-    // This map structure is based on the Google Places API's place details response.
-    // Ensure to use the correct keys according to the API response format.
+    // Safely get the nested location data to avoid 'NoSuchMethodError'
+    var locationData = map['geometry']?['location'];
+    double lat = locationData?['lat'] ?? 0.0; // Provide default values
+    double lng = locationData?['lng'] ?? 0.0; // Provide default values
 
-    String address = map['formatted_address'] ?? 'No address';
-    String phoneNumber = map['formatted_phone_number'] ?? 'No phone number';
+    String address = map['formatted_address'] ?? 'No address available';
+    String phoneNumber =
+        map['formatted_phone_number'] ?? 'No phone number available';
     double rating = (map['rating'] as num?)?.toDouble() ?? 0.0;
-    List<String> reviews = [];
-    if (map['reviews'] != null) {
-      reviews = List<Map>.from(map['reviews'])
-          .map((review) => review['text'].toString())
-          .toList();
-    }
-    List<String> photoReferences = [];
-    if (map['photos'] != null) {
-      photoReferences = List<Map>.from(map['photos'])
-          .map((photo) => photo['photo_reference'].toString())
-          .toList();
-    }
+
+    List<String> reviews =
+        (map['reviews'] as List?)?.map((r) => r['text'].toString()).toList() ??
+            [];
+    List<String> photoReferences = (map['photos'] as List?)
+            ?.map((p) => p['photo_reference'].toString())
+            .toList() ??
+        [];
 
     return Place(
-      name: map['name'],
-      latitude: map['geometry']['location']['lat'],
-      longitude: map['geometry']['location']['lng'],
-      placeId: map['place_id'],
+      name: map['name'] ?? 'Unknown Name',
+      latitude: lat,
+      longitude: lng,
+      placeId: map['place_id'] ?? 'No ID',
       address: address,
       phoneNumber: phoneNumber,
       rating: rating,
