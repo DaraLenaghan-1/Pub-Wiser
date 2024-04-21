@@ -191,39 +191,57 @@ class _HomePageState extends State<HomePage> {
           onTap: () {
             showModalBottomSheet<void>(
               context: context,
-              isScrollControlled: false, // allows the modal to be full-screen
+              isScrollControlled: false,
+              isDismissible: true,
+              backgroundColor: Colors.transparent,
+              barrierColor: Colors
+                  .transparent, // Ensure the dimming background is also transparent
               builder: (BuildContext context) {
                 return DraggableScrollableSheet(
                   initialChildSize:
-                      0.25, // 25% of the screen height when opened
+                      0.25, // The initial size of the sheet when it's displayed.
                   minChildSize:
-                      0.25, // Minimum size of the bottom sheet when opened
+                      0.25, // The minimum size of the sheet when it's opened.
                   maxChildSize:
-                      1, // It will cover the whole screen when user drags upwards
+                      1.0, // The maximum size of the sheet when it's dragged upwards.
                   builder: (BuildContext context,
                       ScrollController scrollController) {
                     return Container(
-                      // Apply your desired styling here
-                      child: ListView.builder(
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors
+                            .white, // The color of the modal's content area.
+                        borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(
+                                20)), // Creates a rounded corner on the top edge of the modal.
+                      ),
+                      child: ListView(
                         controller:
-                            scrollController, // Use the provided ScrollController
-                        itemCount:
-                            1, // Assuming you want to show only one item for now
-                        itemBuilder: (_, index) {
-                          return ListTile(
-                            title: Text(bar.name),
-                            subtitle: Text('Tap for details'),
-                            onTap: () {
-                              // Your code to navigate to the PubDetailsPage or expand the modal
-                            },
-                          );
-                        },
+                            scrollController, // Assign the provided ScrollController to the ListView.
+                        children: <Widget>[
+                          Center(
+                            child: Container(
+                              width: 40,
+                              height: 5,
+                              margin: EdgeInsets.symmetric(vertical: 10),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[
+                                    300], // The color of the drag handle indicator.
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                          Text(bar.name), // Display the name of the bar.
+                          // Include more widgets to display additional details like reviews, images, opening times, etc.
+                        ],
                       ),
                     );
                   },
                 );
               },
             );
+
+            // End of showModalBottomSheet
           });
       newMarkers.add(marker);
     }
