@@ -197,61 +197,73 @@ class _HomePageState extends State<HomePage> {
               context: context,
               isScrollControlled: true,
               backgroundColor: Colors.transparent,
-              barrierColor: Colors.transparent,
+              //barrierColor: Colors.transparent,
+              isDismissible: true,
               builder: (BuildContext context) {
-                return DraggableScrollableSheet(
-                  initialChildSize: 0.25,
-                  minChildSize: 0.25,
-                  maxChildSize: 1.0,
-                  builder: (BuildContext context,
-                      ScrollController scrollController) {
-                    return Container(
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(20)),
-                      ),
-                      child: ListView.builder(
-                        controller: scrollController,
-                        itemCount: 1,
-                        itemBuilder: (_, index) {
-                          return Column(
-                            children: <Widget>[
-                              Padding(
-                                padding: EdgeInsets.symmetric(vertical: 10),
-                                child: Text(bar.name,
-                                    style: TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold)),
-                              ),
-                              Text(
-                                  'Address: ${placeDetails.address ?? "Not available"}'),
-                              Text(
-                                  'Phone: ${placeDetails.phoneNumber ?? "Not available"}'),
-                              Text(
-                                  'Rating: ${placeDetails.rating?.toString() ?? "Not rated"}'),
-                              Text(bar.description ??
-                                  'No description available'),
-                              Text(bar.openingHours ??
-                                  'Opening hours not available'),
-                              ...placeDetails.reviews?.map((review) => ListTile(
-                                        title: Text('Review'),
-                                        subtitle: Text(review),
-                                      )) ??
-                                  [],
-                              ...placeDetails.photoReferences?.map((photoRef) {
-                                    var photoUrl =
-                                        placeDetails.getPhotoUrl(photoRef);
-                                    return Image.network(photoUrl, height: 200);
-                                  }) ??
-                                  [],
-                            ],
-                          );
-                        },
-                      ),
-                    );
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.pop(
+                        context); // Dismiss the modal when the background is tapped
                   },
+                  behavior: HitTestBehavior
+                      .opaque, // Make sure the empty areas are part of the hit test
+                  child: DraggableScrollableSheet(
+                    initialChildSize: 0.25,
+                    minChildSize: 0.25,
+                    maxChildSize: 1.0,
+                    builder: (BuildContext context,
+                        ScrollController scrollController) {
+                      return Container(
+                        padding: EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius:
+                              BorderRadius.vertical(top: Radius.circular(20)),
+                        ),
+                        child: ListView.builder(
+                          controller: scrollController,
+                          itemCount: 1,
+                          itemBuilder: (_, index) {
+                            return Column(
+                              children: <Widget>[
+                                Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 10),
+                                  child: Text(bar.name,
+                                      style: TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold)),
+                                ),
+                                Text(
+                                    'Address: ${placeDetails.address ?? "Not available"}'),
+                                Text(
+                                    'Phone: ${placeDetails.phoneNumber ?? "Not available"}'),
+                                Text(
+                                    'Rating: ${placeDetails.rating?.toString() ?? "Not rated"}'),
+                                Text(bar.description ??
+                                    'No description available'),
+                                Text(bar.openingHours ??
+                                    'Opening hours not available'),
+                                ...placeDetails.reviews
+                                        ?.map((review) => ListTile(
+                                              title: Text('Review'),
+                                              subtitle: Text(review),
+                                            )) ??
+                                    [],
+                                ...placeDetails.photoReferences
+                                        ?.map((photoRef) {
+                                      var photoUrl =
+                                          placeDetails.getPhotoUrl(photoRef);
+                                      return Image.network(photoUrl,
+                                          height: 200);
+                                    }) ??
+                                    [],
+                              ],
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
                 );
               },
             );
