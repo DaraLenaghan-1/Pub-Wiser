@@ -17,6 +17,7 @@ class GooglePlacesClient {
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
+      print("API Response: $data");
       if (data['status'] == 'OK') {
         return (data['results'] as List)
             .map((result) => Place.fromMap(result))
@@ -34,19 +35,26 @@ class GooglePlacesClient {
   Future<Place> fetchPlaceDetails(String placeId) async {
     String url =
         'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&fields=name,rating,formatted_phone_number,formatted_address,reviews,photos&key=$GOOGLE_MAPS_API_KEY';
-
-    var response = await httpClient.get(Uri.parse(url));
-    if (response.statusCode == 200) {
-      var data = jsonDecode(response.body);
-      if (data['status'] == 'OK') {
-        return Place.fromDetailMap(data['result']);
+    try {
+      var response = await httpClient.get(Uri.parse(url));
+      print("API Response: ${response.body}");
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        print("Detail API Response: $data"); // Log the detailed response
+        if (data['status'] == 'OK') {
+          return Place.fromDetailMap(data['result']);
+        } else {
+          // Throw an exception if the API status is not OK
+          throw Exception(
+              'Failed to load place details: ${data['error_message']}');
+        }
       } else {
-        throw Exception(
-            'Failed to load place details: ${data['error_message']}');
+        // Throw an exception if the HTTP status code is not 200
+        throw Exception('HTTP error with status: ${response.statusCode}');
       }
-    } else {
-      throw Exception(
-          'Failed to make place details API call with status: ${response.statusCode}');
+    } catch (e) {
+      print("Error fetching place details: $e");
+      rethrow; // Correctly use `rethrow` to propagate caught exception
     }
   }
 }
@@ -63,6 +71,7 @@ class Place {
   double? rating;
   List<String>? reviews;
   List<String>? photoReferences;
+  String? openingHours;
 
   Place({
     required this.name,
@@ -76,6 +85,7 @@ class Place {
     this.rating,
     this.reviews,
     this.photoReferences,
+    this.openingHours,
   });
 
   // Method to update the place details after fetching from the API
@@ -100,35 +110,43 @@ class Place {
       photoReferences: photoRefs,
     );
   }
-  factory Place.fromDetailMap(Map<String, dynamic> map) {
-    // Safely get the nested location data to avoid 'NoSuchMethodError'
-    var locationData = map['geometry']?['location'];
-    double lat = locationData?['lat'] ?? 0.0; // Provide default values
-    double lng = locationData?['lng'] ?? 0.0; // Provide default values
 
-    String address = map['formatted_address'] ?? 'No address available';
-    String phoneNumber =
-        map['formatted_phone_number'] ?? 'No phone number available';
+  factory Place.fromDetailMap(Map<String, dynamic> map) {
+    var geometry = map['geometry'] as Map<String, dynamic>?;
+    var location = geometry?['location'] as Map<String, dynamic>?;
+    double lat = (location?['lat'] as double?) ?? 0.0;
+    double lng = (location?['lng'] as double?) ?? 0.0;
+
+    String address =
+        (map['formatted_address'] as String?) ?? 'No address available';
+    String phoneNumber = (map['formatted_phone_number'] as String?) ??
+        'No phone number available';
     double rating = (map['rating'] as num?)?.toDouble() ?? 0.0;
 
-    List<String> reviews =
-        (map['reviews'] as List?)?.map((r) => r['text'].toString()).toList() ??
-            [];
-    List<String> photoReferences = (map['photos'] as List?)
-            ?.map((p) => p['photo_reference'].toString())
-            .toList() ??
-        [];
+    var reviewsData = map['reviews'] as List<dynamic>? ?? [];
+    List<String> reviews = reviewsData
+        .map((r) => (r['text'] as String?) ?? 'No review text')
+        .toList();
+
+    var photosData = map['photos'] as List<dynamic>? ?? [];
+    List<String> photoReferences =
+        photosData.map((p) => (p['photo_reference'] as String?) ?? '').toList();
+
+    String openingHours =
+        (map['opening_hours']?['weekday_text'] as List<dynamic>?)?.join('\n') ??
+            'No opening hours available';
 
     return Place(
-      name: map['name'] ?? 'Unknown Name',
+      name: map['name'] as String? ?? 'Unknown',
       latitude: lat,
       longitude: lng,
-      placeId: map['place_id'] ?? 'No ID',
+      placeId: map['place_id'] as String? ?? 'No Place ID',
       address: address,
       phoneNumber: phoneNumber,
       rating: rating,
       reviews: reviews,
       photoReferences: photoReferences,
+      openingHours: openingHours,
     );
   }
 

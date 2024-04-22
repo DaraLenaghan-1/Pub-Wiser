@@ -197,6 +197,7 @@ class _HomePageState extends State<HomePage> {
               context: context,
               isScrollControlled: true,
               backgroundColor: Colors.transparent,
+              barrierColor: Colors.transparent,
               builder: (BuildContext context) {
                 return DraggableScrollableSheet(
                   initialChildSize: 0.25,
@@ -230,20 +231,21 @@ class _HomePageState extends State<HomePage> {
                                   'Phone: ${placeDetails.phoneNumber ?? "Not available"}'),
                               Text(
                                   'Rating: ${placeDetails.rating?.toString() ?? "Not rated"}'),
-                              if (placeDetails.reviews != null)
-                                ...placeDetails.reviews!
-                                    .map((review) => ListTile(
-                                          title: Text('Review'),
-                                          subtitle: Text(review),
-                                        )),
-                              // Display images if available
-                              if (placeDetails.photoReferences != null)
-                                ...placeDetails.photoReferences!
-                                    .map((photoRef) {
-                                  var photoUrl =
-                                      placeDetails.getPhotoUrl(photoRef);
-                                  return Image.network(photoUrl, height: 200);
-                                }),
+                              Text(bar.description ??
+                                  'No description available'),
+                              Text(bar.openingHours ??
+                                  'Opening hours not available'),
+                              ...placeDetails.reviews?.map((review) => ListTile(
+                                        title: Text('Review'),
+                                        subtitle: Text(review),
+                                      )) ??
+                                  [],
+                              ...placeDetails.photoReferences?.map((photoRef) {
+                                    var photoUrl =
+                                        placeDetails.getPhotoUrl(photoRef);
+                                    return Image.network(photoUrl, height: 200);
+                                  }) ??
+                                  [],
                             ],
                           );
                         },
@@ -253,6 +255,7 @@ class _HomePageState extends State<HomePage> {
                 );
               },
             );
+            // ShowBottomSheet
           } catch (e) {
             print("Failed to fetch place details: $e");
           }
