@@ -329,7 +329,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 child: ListView(
                   controller: scrollController,
-                  children: [
+                  children: <Widget>[
                     Center(
                       child: Padding(
                         padding: EdgeInsets.symmetric(vertical: 10),
@@ -356,11 +356,11 @@ class _HomePageState extends State<HomePage> {
                             'Rating: ${placeDetails.rating?.toString() ?? "Not rated"}',
                             textAlign: TextAlign.center)),
                     Center(
-                        child: Text(
-                            pub.description ?? 'No description available',
-                            textAlign: TextAlign.center)),
-                    SizedBox(
-                        height: 20), // Spacing before the drink prices section
+                      child: Text(pub.description ?? 'No description available',
+                          textAlign: TextAlign.center),
+                    ),
+                    // SizedBox for spacing
+                    SizedBox(height: 10),
                     Divider(
                         color: Colors.grey,
                         thickness: 2), // Line separating sections
@@ -377,9 +377,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ),
-                    Divider(
-                        color: Colors.grey,
-                        thickness: 2), // Line after the title
+                    // Listing the drink prices
                     ...drinks.map(
                       (drink) => ListTile(
                         title: Center(
@@ -389,8 +387,43 @@ class _HomePageState extends State<HomePage> {
                             textAlign: TextAlign.center),
                       ),
                     ),
+                    Divider(color: Colors.grey, thickness: 2),
+                    // Gallery section (conditionally rendered)
+                    if (placeDetails.photoReferences?.isNotEmpty ?? false)
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10),
+                        child: Center(
+                          child: Text(
+                            'Gallery',
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    if (placeDetails.photoReferences?.isNotEmpty ?? false)
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 1,
+                        ),
+                        itemCount: placeDetails.photoReferences?.length ?? 0,
+                        itemBuilder: (context, index) {
+                          var photoRef = placeDetails.photoReferences?[index];
+                          var photoUrl = photoRef != null
+                              ? placeDetails.getPhotoUrl(photoRef)
+                              : '';
+                          return Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: Image.network(photoUrl, fit: BoxFit.cover),
+                          );
+                        },
+                      ),
                     SizedBox(
                         height: 20), // Spacing after the drink prices section
+
                     Divider(
                         color: Colors.grey,
                         thickness: 2), // Line before the reviews section
