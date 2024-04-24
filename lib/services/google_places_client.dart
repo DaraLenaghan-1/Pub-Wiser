@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:first_app/models/drink.dart';
+import 'package:first_app/services/firestore_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:first_app/const.dart';
 
@@ -37,24 +39,24 @@ class GooglePlacesClient {
         'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&fields=name,rating,formatted_phone_number,formatted_address,reviews,photos&key=$GOOGLE_MAPS_API_KEY';
     try {
       var response = await httpClient.get(Uri.parse(url));
-      print("API Response: ${response.body}");
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
-        print("Detail API Response: $data"); // Log the detailed response
         if (data['status'] == 'OK') {
-          return Place.fromDetailMap(data['result']);
+          Place place = Place.fromDetailMap(data['result']);
+          // Fetch additional data from Firestore and update the place
+          List<Drink> drinks = await FirestoreService().getDrinkPrices(placeId);
+          place.updateDrinks(drinks);
+          return place; // Return the updated place
         } else {
-          // Throw an exception if the API status is not OK
           throw Exception(
               'Failed to load place details: ${data['error_message']}');
         }
       } else {
-        // Throw an exception if the HTTP status code is not 200
         throw Exception('HTTP error with status: ${response.statusCode}');
       }
     } catch (e) {
       print("Error fetching place details: $e");
-      rethrow; // Correctly use `rethrow` to propagate caught exception
+      rethrow;
     }
   }
 }
@@ -72,6 +74,7 @@ class Place {
   List<String>? reviews;
   List<String>? photoReferences;
   String? openingHours;
+  List<Drink> drinks = [];
 
   Place({
     required this.name,
@@ -96,6 +99,11 @@ class Place {
     this.rating = rating;
     this.reviews = reviews;
     this.photoReferences = photoReferences;
+  }
+
+  // New method to update drinks
+  void updateDrinks(List<Drink> newDrinks) {
+    this.drinks = newDrinks;
   }
 
   factory Place.fromMap(Map<String, dynamic> map) {

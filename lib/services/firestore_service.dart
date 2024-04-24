@@ -99,8 +99,7 @@ class FirestoreService {
           .get();
 
       return snapshot.docs
-          .map((doc) => PriceSuggestion.fromMap(
-              doc.data(), doc.id))
+          .map((doc) => PriceSuggestion.fromMap(doc.data(), doc.id))
           .toList();
     } catch (e) {
       print("Error fetching price suggestions: $e");
@@ -139,6 +138,27 @@ class FirestoreService {
     var topSuggestion = await getTopPriceSuggestion(pubId, drinkName);
     if (topSuggestion != null && topSuggestion.votes > 0) {
       return updateDrinkPrice(drinkName, topSuggestion.suggestedPrice, pubId);
+    }
+  }
+
+  Future<Pub?> getPubByTitle(String title) async {
+    try {
+      // Query the collection for a pub with a matching title
+      var snapshot = await _firestore
+          .collection('pubData')
+          .where('title', isEqualTo: title)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        // Return the first pub if found
+        return Pub.fromFirestore(snapshot.docs.first);
+      }
+      // Return null if there's no pub with the given title
+      return null;
+    } catch (e) {
+      print('Error fetching pub by title: $e');
+      return null;
     }
   }
 }

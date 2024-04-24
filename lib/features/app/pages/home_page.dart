@@ -1,6 +1,9 @@
 import 'dart:async';
 
 import 'package:first_app/const.dart';
+import 'package:first_app/models/drink.dart';
+import 'package:first_app/models/pub.dart';
+import 'package:first_app/services/firestore_service.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -193,7 +196,17 @@ class _HomePageState extends State<HomePage> {
             // Fetch details for the selected place
             var placeDetails =
                 await placesClient.fetchPlaceDetails(bar.placeId);
-            showModalBottomSheet<void>(
+            //fetch drinks data from Firestore
+            var pub = await FirestoreService().getPubByTitle(bar.name);
+            if (pub != null) {
+              var drinks = await FirestoreService().getDrinkPrices(pub.id);
+              showModalWithDrinkPrices(context, pub, drinks, placeDetails);
+            } else {
+              showModalWithErrorMessage(
+                  context, "No matching pub found in database.");
+            }
+
+            /*showModalBottomSheet<void>(
               context: context,
               isScrollControlled: true,
               backgroundColor: Colors.transparent,
@@ -257,6 +270,18 @@ class _HomePageState extends State<HomePage> {
                                           height: 200);
                                     }) ??
                                     [],
+                                Divider(color: Colors.grey),
+                                Text('Drink Prices',
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold)),
+                                ...drinks
+                                    .map((drink) => ListTile(
+                                          title: Text(drink.name),
+                                          trailing: Text(
+                                              '€${drink.price.toStringAsFixed(2)}'),
+                                        ))
+                                    .toList(),
                               ],
                             );
                           },
@@ -266,8 +291,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 );
               },
-            );
-            // ShowBottomSheet
+            ); // ShowBottomSheet */
           } catch (e) {
             print("Failed to fetch place details: $e");
           }
@@ -279,6 +303,132 @@ class _HomePageState extends State<HomePage> {
       _markers.clear();
       _markers.addAll(newMarkers);
     });
+  }
+
+  Future<void> showModalWithDrinkPrices(BuildContext context, Pub pub,
+      List<Drink> drinks, Place placeDetails) async {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      isDismissible: true,
+      builder: (BuildContext context) {
+        return GestureDetector(
+          onTap: () => Navigator.pop(context),
+          behavior: HitTestBehavior.opaque,
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.5,
+            minChildSize: 0.25,
+            maxChildSize: 0.85,
+            builder: (BuildContext context, ScrollController scrollController) {
+              return Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                child: ListView(
+                  controller: scrollController,
+                  children: [
+                    Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10),
+                        child: Text(
+                          placeDetails.name,
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                    Center(
+                        child: Text(
+                            'Address: ${placeDetails.address ?? "Not available"}',
+                            textAlign: TextAlign.center)),
+                    Center(
+                        child: Text(
+                            'Phone: ${placeDetails.phoneNumber ?? "Not available"}',
+                            textAlign: TextAlign.center)),
+                    Center(
+                        child: Text(
+                            'Rating: ${placeDetails.rating?.toString() ?? "Not rated"}',
+                            textAlign: TextAlign.center)),
+                    Center(
+                        child: Text(
+                            pub.description ?? 'No description available',
+                            textAlign: TextAlign.center)),
+                    SizedBox(
+                        height: 20), // Spacing before the drink prices section
+                    Divider(
+                        color: Colors.grey,
+                        thickness: 2), // Line separating sections
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      child: Center(
+                        child: Text(
+                          'Drink Prices',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                    Divider(
+                        color: Colors.grey,
+                        thickness: 2), // Line after the title
+                    ...drinks.map(
+                      (drink) => ListTile(
+                        title: Center(
+                            child:
+                                Text(drink.name, textAlign: TextAlign.center)),
+                        trailing: Text('€${drink.price.toStringAsFixed(2)}',
+                            textAlign: TextAlign.center),
+                      ),
+                    ),
+                    SizedBox(
+                        height: 20), // Spacing after the drink prices section
+                    Divider(
+                        color: Colors.grey,
+                        thickness: 2), // Line before the reviews section
+                    ...placeDetails.reviews?.map(
+                          (review) => ListTile(
+                            title: Text('Review', textAlign: TextAlign.center),
+                            subtitle: Text(review, textAlign: TextAlign.center),
+                          ),
+                        ) ??
+                        [],
+                    ...placeDetails.photoReferences?.map((photoRef) {
+                          var photoUrl = placeDetails.getPhotoUrl(photoRef);
+                          return Center(
+                              child: Image.network(photoUrl, height: 200));
+                        }) ??
+                        [],
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  void showModalWithErrorMessage(BuildContext context, String message) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: EdgeInsets.all(16),
+          child: Center(
+            child: Text(message),
+          ),
+        );
+      },
+    );
   }
 
   void loadCustomMarker() async {
