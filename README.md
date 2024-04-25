@@ -34,7 +34,6 @@ flutter pub get
 Replace the dummy API keys in the respective configuration files:
 - Firebase configuration in `android/app/google-services.json` and `ios/Runner/GoogleService-Info.plist`
 - Google API key in `android/app/src/main/AndroidManifest.xml` and `ios/Runner/Info.plist`
-- Stripe API keys in the environment variables or configuration file
 
 ### 4. Build the project
 To compile the project, select your target platform and build:
