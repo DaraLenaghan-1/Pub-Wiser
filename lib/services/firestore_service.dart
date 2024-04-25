@@ -161,4 +161,27 @@ class FirestoreService {
       return null;
     }
   }
+
+  // Method to add a missing pub/bar to the suggestions collection
+  Future<void> addMissingPubSuggestion(Map<String, dynamic> pubData) async {
+    try {
+      // Check if the pub already exists
+      var existingPub = await getPubByTitle(pubData['name']);
+      if (existingPub == null) {
+        // Add to suggestions if it does not exist
+        await _firestore.collection('pubSuggestions').add({
+          'name': pubData['name'],
+          'location':
+              pubData['location'], // Assume 'location' is part of the data
+          'addedOn': fs.FieldValue.serverTimestamp(),
+          'status': 'pending'
+        });
+        print('Added missing pub to suggestions.');
+      } else {
+        print('Pub already exists.');
+      }
+    } catch (e) {
+      print('Error adding missing pub suggestion: $e');
+    }
+  }
 }
