@@ -160,11 +160,12 @@ class _SignUpPageState extends State<SignUpPage> {
       isSigningUp = true;
     });
 
-    String username = usernameController.text;
-    String email = emailController.text;
-    String password = passwordController.text;
+    String username = usernameController.text.trim();
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
 
-    User? user = await _auth.signUpWithEmailAndPassword(email, password);
+    User? user =
+        await _auth.signUpWithEmailAndPassword(email, password, username);
 
     setState(() {
       isSigningUp = false;
