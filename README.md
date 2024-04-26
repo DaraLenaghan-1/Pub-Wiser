@@ -1,7 +1,7 @@
 # Pub-Wiser
 
 ## Overview
-Pub-Wiser is an innovative mobile application designed to streamline the discovery and exploration of pubs tailored to user preferences. Built with the Flutter framework and Dart programming language, Pub-Wiser leverages Google Cloud Firestore for real-time data storage, Google Places API for detailed pub information, and integrates with Stripe for secure payment processing.
+Pub-Wiser is a pint price comparison application designed to streamline the discovery and exploration of pubs tailored to user preferences. Its main target audience includes tourists and students, but it's also useful for locals to keep track of price changes across various pubs and bars. Built with the Flutter framework and Dart programming language, Pub-Wiser leverages Google Cloud Firestore for real-time data storage, Google Places API for detailed pub information, and integrates with Stripe for secure payment processing.
 
 ## Features
 - **Pub Discovery**: Users can search and filter pubs based on location, ambiance, and available services.
