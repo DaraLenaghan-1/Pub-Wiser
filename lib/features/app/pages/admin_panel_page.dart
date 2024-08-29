@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:first_app/services/firestore_service.dart';
-import 'package:first_app/models/pub.dart';
 
 class AdminPanelPage extends StatefulWidget {
   const AdminPanelPage({Key? key}) : super(key: key);
@@ -9,46 +8,38 @@ class AdminPanelPage extends StatefulWidget {
   _AdminPanelPageState createState() => _AdminPanelPageState();
 }
 
-class _AdminPanelPageState extends State {
-// FirestoreService can be used to interact with Firestore for data manipulation
-  final FirestoreService _firestoreService = FirestoreService();
+class _AdminPanelPageState extends State<AdminPanelPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Admin Panel"),
+        title: const Text('Admin Panel'),
       ),
-      body: Container(
-        padding: EdgeInsets.all(16),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Example button for fetching unapproved pubs
             ElevatedButton(
-              onPressed: () => _navigateToUnapprovedPubs(context),
-              child: Text("Review Pubs"),
+              onPressed: () {
+                // Navigate to a page for managing users
+              },
+              child: const Text('Manage Users'),
             ),
-            // Example button for managing user roles
             ElevatedButton(
-              onPressed: () => _navigateToUserRoles(context),
-              child: Text("Manage User Roles"),
+              onPressed: () {
+                // Navigate to a page for approving pub suggestions
+              },
+              child: const Text('Approve Pub Suggestions'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // Navigate to a page for monitoring app usage
+              },
+              child: const Text('Monitor App Usage'),
             ),
           ],
         ),
       ),
     );
-  }
-
-// Navigate to a page showing unapproved pubs
-  void _navigateToUnapprovedPubs(BuildContext context) {
-    //Navigator.of(context).push(MaterialPageRoute(
-      //builder: (context) => UnapprovedPubsPage(),
-   // ));
-  }
-
-// Navigate to a page for managing user roles
-  void _navigateToUserRoles(BuildContext context) {
-   // Navigator.of(context).push(MaterialPageRoute(
-      //builder: (context) => UserRoleManagementPage(),
-    //));
   }
 }

@@ -11,13 +11,12 @@ import 'package:google_fonts/google_fonts.dart';
 final theme = ThemeData(
   useMaterial3: true,
   colorScheme: const ColorScheme.light(
-    primary:
-        Color(0xFF14213D), // Dark blue, used for interactive elements
+    primary: Colors.black,
+    //Color(0xFF14213D), // Dark blue, used for interactive elements
     onPrimary: Colors.white, // For legibility on primary color
     secondary: Color(0xFFFCA311), // Orange, used for secondary accents
     onSecondary: Colors.black, // For legibility on secondary color
-    background:
-        Color(0xFFFFFFFF), // White background for general app usage
+    background: Color(0xFFFFFFFF), // White background for general app usage
     onBackground: Colors.black, // For legibility on background color
     surface: Color(0xFFE5E5E5), // Light gray for cards and UI surfaces
     onSurface: Colors.black, // For legibility on surface color

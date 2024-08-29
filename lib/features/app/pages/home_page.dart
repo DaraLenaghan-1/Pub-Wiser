@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'dart:ui' as ui;
 import 'package:first_app/const.dart';
 import 'package:first_app/models/drink.dart';
 import 'package:first_app/models/pub.dart';
@@ -27,9 +27,7 @@ class _HomePageState extends State<HomePage> {
       Completer<GoogleMapController>();
 
   static const LatLng _pGalwayCity =
-      LatLng(53.27453804687606, -9.049238146120606); //position of Galway City
-  static const LatLng _pGalwayCitySpanishArch =
-      LatLng(53.27022682627128, -9.053970096184496); //position of spanish arch
+      LatLng(53.27453804687606, -9.049238146120606); // Position of Galway City
   LatLng? _currentPosition;
 
   final Map<PolylineId, Polyline> _polylines = {};
@@ -59,21 +57,16 @@ class _HomePageState extends State<HomePage> {
               child: Text("Loading..."),
             )
           : GoogleMap(
-              onMapCreated: ((GoogleMapController controller) =>
-                  _mapController.complete(controller)),
+              onMapCreated: (GoogleMapController controller) {
+                _mapController.complete(controller);
+                setState(
+                    () {}); // Trigger a rebuild to ensure markers are displayed
+              },
               initialCameraPosition:
                   const CameraPosition(target: _pGalwayCity, zoom: 14),
               markers: _markers,
               polylines: Set<Polyline>.of(_polylines.values),
             ),
-    );
-  }
-
-  Future<void> _goToCamPosition(LatLng position) async {
-    final GoogleMapController controller = await _mapController.future;
-    CameraPosition newCamPosition = CameraPosition(target: position, zoom: 14);
-    await controller.animateCamera(
-      CameraUpdate.newCameraPosition(newCamPosition),
     );
   }
 
@@ -116,7 +109,6 @@ class _HomePageState extends State<HomePage> {
               infoWindow: const InfoWindow(title: 'Your Location'),
             ));
           });
-          //_goToCamPosition(newPosition); -- Uncomment this line to center the map on the user's location
         }
       },
     );
@@ -127,8 +119,7 @@ class _HomePageState extends State<HomePage> {
     PolylinePoints polylinePoints = PolylinePoints();
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
       GOOGLE_MAPS_API_KEY,
-      PointLatLng(
-          _pGalwayCitySpanishArch.latitude, _pGalwayCitySpanishArch.longitude),
+      PointLatLng(_pGalwayCity.latitude, _pGalwayCity.longitude),
       PointLatLng(_pGalwayCity.latitude, _pGalwayCity.longitude),
       travelMode: TravelMode.walking,
     );
@@ -166,7 +157,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void updateMapMarkers(List<Place> bars) {
+  void updateMapMarkers(List<Place> bars) async {
     var newMarkers = <Marker>{};
 
     // Adding a marker for the user's current location with a custom icon
@@ -180,118 +171,46 @@ class _HomePageState extends State<HomePage> {
       ));
     }
 
-    // Adding markers for the bars
     for (var bar in bars) {
       var markerId = MarkerId(bar.name);
+
+      // Fetch drink prices for the current bar
+      var pub = await FirestoreService().getPubByTitle(bar.name);
+      double guinnessPrice = 0.0;
+      List<Drink> drinks = [];
+
+      if (pub != null) {
+        drinks = await FirestoreService().getDrinkPrices(pub.id);
+        // Assuming "Guinness" is the name of the drink we are interested in
+        var guinness = drinks.firstWhere(
+          (drink) => drink.name.toLowerCase() == 'Guinness'.toLowerCase(),
+          orElse: () => Drink(name: 'Guinness', price: 0.0),
+        );
+        guinnessPrice = guinness.price;
+      }
+
+      // Create a custom marker with the Guinness price
+      final markerIcon =
+          await createCustomMarker(guinnessPrice.toStringAsFixed(2));
+
       var marker = Marker(
         markerId: markerId,
         position: LatLng(bar.latitude, bar.longitude),
-        icon: BitmapDescriptor.defaultMarker,
-        infoWindow: InfoWindow(
-          title: bar.name,
-          snippet: 'Click for details',
-        ),
+        icon: markerIcon,
         onTap: () async {
+          // Display details when marker is tapped
           try {
-            // Fetch details for the selected place
             var placeDetails =
                 await placesClient.fetchPlaceDetails(bar.placeId);
-            //fetch drinks data from Firestore
-            var pub = await FirestoreService().getPubByTitle(bar.name);
             if (pub != null) {
-              var drinks = await FirestoreService().getDrinkPrices(pub.id);
               showModalWithDrinkPrices(context, pub, drinks, placeDetails);
             } else {
+              // Show the modal with the pub/bar name and "No matching pubs found in database"
               showModalWithErrorMessage(
-                  context, "No matching pub found in database.");
+                context,
+                "No matching pubs found in database for ${bar.name}.",
+              );
             }
-
-            /*showModalBottomSheet<void>(
-              context: context,
-              isScrollControlled: true,
-              backgroundColor: Colors.transparent,
-              //barrierColor: Colors.transparent,
-              isDismissible: true,
-              builder: (BuildContext context) {
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.pop(
-                        context); // Dismiss the modal when the background is tapped
-                  },
-                  behavior: HitTestBehavior
-                      .opaque, // Make sure the empty areas are part of the hit test
-                  child: DraggableScrollableSheet(
-                    initialChildSize: 0.25,
-                    minChildSize: 0.25,
-                    maxChildSize: 1.0,
-                    builder: (BuildContext context,
-                        ScrollController scrollController) {
-                      return Container(
-                        padding: EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius:
-                              BorderRadius.vertical(top: Radius.circular(20)),
-                        ),
-                        child: ListView.builder(
-                          controller: scrollController,
-                          itemCount: 1,
-                          itemBuilder: (_, index) {
-                            return Column(
-                              children: <Widget>[
-                                Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 10),
-                                  child: Text(bar.name,
-                                      style: TextStyle(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold)),
-                                ),
-                                Text(
-                                    'Address: ${placeDetails.address ?? "Not available"}'),
-                                Text(
-                                    'Phone: ${placeDetails.phoneNumber ?? "Not available"}'),
-                                Text(
-                                    'Rating: ${placeDetails.rating?.toString() ?? "Not rated"}'),
-                                Text(bar.description ??
-                                    'No description available'),
-                                Text(bar.openingHours ??
-                                    'Opening hours not available'),
-                                ...placeDetails.reviews
-                                        ?.map((review) => ListTile(
-                                              title: Text('Review'),
-                                              subtitle: Text(review),
-                                            )) ??
-                                    [],
-                                ...placeDetails.photoReferences
-                                        ?.map((photoRef) {
-                                      var photoUrl =
-                                          placeDetails.getPhotoUrl(photoRef);
-                                      return Image.network(photoUrl,
-                                          height: 200);
-                                    }) ??
-                                    [],
-                                Divider(color: Colors.grey),
-                                Text('Drink Prices',
-                                    style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold)),
-                                ...drinks
-                                    .map((drink) => ListTile(
-                                          title: Text(drink.name),
-                                          trailing: Text(
-                                              '€${drink.price.toStringAsFixed(2)}'),
-                                        ))
-                                    .toList(),
-                              ],
-                            );
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
-            ); // ShowBottomSheet */
           } catch (e) {
             print("Failed to fetch place details: $e");
           }
@@ -299,13 +218,53 @@ class _HomePageState extends State<HomePage> {
       );
       newMarkers.add(marker);
     }
+
     setState(() {
       _markers.clear();
       _markers.addAll(newMarkers);
     });
   }
 
-  Future<void> showModalWithDrinkPrices(BuildContext context, Pub pub,
+  Future<BitmapDescriptor> createCustomMarker(String price) async {
+    final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(pictureRecorder);
+    final Paint paint = Paint()..color = Colors.black; // Black background color
+    final double width = 100;
+    final double height = 50; // Adjust height for the capsule shape
+
+    // Draw the capsule-shaped marker with a black background
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+          Rect.fromLTWH(0.0, 0.0, width, height), Radius.circular(height / 2)),
+      paint,
+    );
+
+    // Draw the price text in white for contrast
+    TextPainter textPainter = TextPainter(
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.text = TextSpan(
+      text: '€$price',
+      style: TextStyle(
+          fontSize: 20.0,
+          color: Colors.white,
+          fontWeight: FontWeight.bold), // White text color
+    );
+    textPainter.layout();
+    textPainter.paint(
+        canvas,
+        Offset((width - textPainter.width) / 2,
+            (height - textPainter.height) / 2));
+
+    final img = await pictureRecorder
+        .endRecording()
+        .toImage(width.toInt(), height.toInt());
+    final data = await img.toByteData(format: ui.ImageByteFormat.png);
+
+    return BitmapDescriptor.fromBytes(data!.buffer.asUint8List());
+  }
+
+  void showModalWithDrinkPrices(BuildContext context, Pub pub,
       List<Drink> drinks, Place placeDetails) async {
     showModalBottomSheet<void>(
       context: context,
