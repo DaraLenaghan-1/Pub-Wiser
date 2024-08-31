@@ -103,7 +103,7 @@ class Place {
 
   // New method to update drinks
   void updateDrinks(List<Drink> newDrinks) {
-    this.drinks = newDrinks;
+    drinks = newDrinks;
   }
 
   factory Place.fromMap(Map<String, dynamic> map) {

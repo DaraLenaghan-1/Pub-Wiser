@@ -84,7 +84,7 @@ class MainDrawer extends ConsumerWidget {
                   )
                 : Container(),
             loading: () => const CircularProgressIndicator(),
-            error: (_, __) => Text('Failed to load role'),
+            error: (_, __) => const Text('Failed to load role'),
           ),
           const Spacer(),
           ListTile(

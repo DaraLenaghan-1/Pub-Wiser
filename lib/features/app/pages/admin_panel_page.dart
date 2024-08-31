@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:first_app/services/firestore_service.dart';
 
 class AdminPanelPage extends StatefulWidget {
-  const AdminPanelPage({Key? key}) : super(key: key);
+  const AdminPanelPage({super.key});
 
   @override
   _AdminPanelPageState createState() => _AdminPanelPageState();

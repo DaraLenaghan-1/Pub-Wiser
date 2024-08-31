@@ -25,6 +25,7 @@ final theme = ThemeData(
   ),
   textTheme: GoogleFonts.latoTextTheme(),
 );
+
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (kIsWeb) {
@@ -54,7 +55,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Pub Wiser',
-      theme: theme,
+      theme: ThemeData(useMaterial3: true),
       home: const SplashScreen(child: LoginPage()),
       routes: {
         '/home': (context) => const HomePage(),

@@ -1,13 +1,11 @@
 import 'dart:async';
 import 'dart:ui' as ui;
-import 'package:first_app/const.dart';
 import 'package:first_app/models/drink.dart';
 import 'package:first_app/models/pub.dart';
 import 'package:first_app/services/firestore_service.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:first_app/services/google_places_client.dart';
 
 class HomePage extends StatefulWidget {
@@ -114,15 +112,19 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<List<LatLng>> getPolyline() async {
+  /*Future<List<LatLng>> getPolyline() async {
     List<LatLng> polylineCoordinates = [];
     PolylinePoints polylinePoints = PolylinePoints();
-    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-      GOOGLE_MAPS_API_KEY,
-      PointLatLng(_pGalwayCity.latitude, _pGalwayCity.longitude),
-      PointLatLng(_pGalwayCity.latitude, _pGalwayCity.longitude),
-      travelMode: TravelMode.walking,
+
+    // Assuming the API might now require a request object or similar
+    var request = PolylineRequest(
+      apiKey: GOOGLE_MAPS_API_KEY,
+      origin: PointLatLng(_pGalwayCity.latitude, _pGalwayCity.longitude),
+      destination: PointLatLng(_pGalwayCity.latitude, _pGalwayCity.longitude),
+      travelMode: TravelMode.walking, // If travelMode still exists
     );
+
+    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(request);
 
     if (result.points.isNotEmpty) {
       for (var point in result.points) {
@@ -132,7 +134,7 @@ class _HomePageState extends State<HomePage> {
       print(result.errorMessage);
     }
     return polylineCoordinates;
-  }
+}*/
 
   void setPolylines(List<LatLng> polylineCoordinates) {
     PolylineId id = const PolylineId("poly");
@@ -228,14 +230,30 @@ class _HomePageState extends State<HomePage> {
   Future<BitmapDescriptor> createCustomMarker(String price) async {
     final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
-    final Paint paint = Paint()..color = Colors.black; // Black background color
-    final double width = 100;
-    final double height = 50; // Adjust height for the capsule shape
 
-    // Draw the capsule-shaped marker with a black background
+    final Paint shadowPaint = Paint()
+      ..color = Colors.grey.withOpacity(0.6); // Shadow color
+    const double shadowWidth = 104;
+    const double shadowHeight = 54;
+
+    // Update the paint color to a slightly lighter grey
+    final Paint paint = Paint()
+      ..color = const Color(0xFFE0E0E0); // Slightly lighter grey color
+    const double width = 100;
+    const double height = 50; // Smaller height for capsule shape
+
+    // Draw the shadow slightly offset from the marker
     canvas.drawRRect(
       RRect.fromRectAndRadius(
-          Rect.fromLTWH(0.0, 0.0, width, height), Radius.circular(height / 2)),
+          const Rect.fromLTWH(2.0, 2.0, shadowWidth, shadowHeight),
+          const Radius.circular(shadowHeight / 2)),
+      shadowPaint,
+    );
+
+    // Draw the capsule-shaped marker with the lighter grey background
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+          const Rect.fromLTWH(0.0, 0.0, width, height), const Radius.circular(height / 2)),
       paint,
     );
 
@@ -245,10 +263,10 @@ class _HomePageState extends State<HomePage> {
     );
     textPainter.text = TextSpan(
       text: '€$price',
-      style: TextStyle(
+      style: const TextStyle(
           fontSize: 20.0,
-          color: Colors.white,
-          fontWeight: FontWeight.bold), // White text color
+          color: Colors.black,
+          fontWeight: FontWeight.bold), // black text color
     );
     textPainter.layout();
     textPainter.paint(
@@ -258,7 +276,7 @@ class _HomePageState extends State<HomePage> {
 
     final img = await pictureRecorder
         .endRecording()
-        .toImage(width.toInt(), height.toInt());
+        .toImage(shadowWidth.toInt(), shadowHeight.toInt());
     final data = await img.toByteData(format: ui.ImageByteFormat.png);
 
     return BitmapDescriptor.fromBytes(data!.buffer.asUint8List());
@@ -281,8 +299,8 @@ class _HomePageState extends State<HomePage> {
             maxChildSize: 0.85,
             builder: (BuildContext context, ScrollController scrollController) {
               return Container(
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
+                padding: const EdgeInsets.all(16),
+                decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),
@@ -291,10 +309,10 @@ class _HomePageState extends State<HomePage> {
                   children: <Widget>[
                     Center(
                       child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 10),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
                         child: Text(
                           placeDetails.name,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
@@ -319,21 +337,19 @@ class _HomePageState extends State<HomePage> {
                           textAlign: TextAlign.center),
                     ),
                     // SizedBox for spacing
-                    SizedBox(height: 10),
-                    Divider(
+                    const SizedBox(height: 10),
+                    const Divider(
                         color: Colors.grey,
                         thickness: 2), // Line separating sections
-                    Padding(
+                    const Padding(
                       padding: EdgeInsets.symmetric(vertical: 10),
                       child: Center(
-                        child: Text(
-                          'Drink Prices',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
+                        child: Text('Drink Prices',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center),
                       ),
                     ),
                     // Listing the drink prices
@@ -346,10 +362,10 @@ class _HomePageState extends State<HomePage> {
                             textAlign: TextAlign.center),
                       ),
                     ),
-                    Divider(color: Colors.grey, thickness: 2),
+                    const Divider(color: Colors.grey, thickness: 2),
                     // Gallery section (conditionally rendered)
                     if (placeDetails.photoReferences?.isNotEmpty ?? false)
-                      Padding(
+                      const Padding(
                         padding: EdgeInsets.symmetric(vertical: 10),
                         child: Center(
                           child: Text(
@@ -363,8 +379,8 @@ class _HomePageState extends State<HomePage> {
                     if (placeDetails.photoReferences?.isNotEmpty ?? false)
                       GridView.builder(
                         shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           childAspectRatio: 1,
                         ),
@@ -380,15 +396,15 @@ class _HomePageState extends State<HomePage> {
                           );
                         },
                       ),
-                    SizedBox(
+                    const SizedBox(
                         height: 20), // Spacing after the drink prices section
 
-                    Divider(
+                    const Divider(
                         color: Colors.grey,
                         thickness: 2), // Line before the reviews section
                     ...placeDetails.reviews?.map(
                           (review) => ListTile(
-                            title: Text('Review', textAlign: TextAlign.center),
+                            title: const Text('Review', textAlign: TextAlign.center),
                             subtitle: Text(review, textAlign: TextAlign.center),
                           ),
                         ) ??
@@ -414,7 +430,7 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder: (BuildContext context) {
         return Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Center(
             child: Text(message),
           ),
@@ -426,7 +442,7 @@ class _HomePageState extends State<HomePage> {
   void loadCustomMarker() async {
     try {
       userLocationIcon = await BitmapDescriptor.fromAssetImage(
-          ImageConfiguration(devicePixelRatio: 2.5),
+          const ImageConfiguration(devicePixelRatio: 2.5),
           'assets/user_location.png');
       setState(() {
         // Trigger a rebuild to update the map with the new icon

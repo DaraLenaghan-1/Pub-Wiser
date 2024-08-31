@@ -105,6 +105,7 @@ dependencies:
 # This is a Flutter plugin for Google APIs. It allows you to access Google APIs in your Flutter app.
 # It provides a set of helper widgets that allow you to use the Google APIs in your Flutter app.
 
+  http: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

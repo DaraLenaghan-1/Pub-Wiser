@@ -194,7 +194,7 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
     }
   }
 
-  void voteOnSuggestion(
+  Future<void> voteOnSuggestion(
       String pubId, String drinkId, String suggestionId, bool upvote) async {
     await FirebaseFirestore.instance
         .collection('pubData')
@@ -206,7 +206,7 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
         .update({'votes': FieldValue.increment(upvote ? 1 : -1)});
 
     showToast(message: "Vote updated successfully!");
-    updateIfNeededAfterChange(pubId, drinkId);
+    await updateIfNeededAfterChange(pubId, drinkId);
   }
 
 // This method checks if an update to the displayed price is needed after any change
@@ -246,46 +246,59 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
       builder: (BuildContext bc) {
         return Container(
           padding: const EdgeInsets.all(10),
-          child: FutureBuilder<List<PriceSuggestion>>(
-            future:
-                FirestoreService().getPriceSuggestions(widget.pub.id, drinkId),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (snapshot.hasError || snapshot.data == null) {
-                print("Error fetching data: ${snapshot.error}");
-                return const Center(
-                    child:
-                        Text("Failed to load suggestions, please try again."));
-              }
-              var suggestions = snapshot.data!;
-              if (suggestions.isEmpty) {
-                return const Center(child: Text("No price suggestions available."));
-              }
-              return ListView.builder(
-                itemCount: suggestions.length,
-                itemBuilder: (context, index) {
-                  var suggestion = suggestions[index];
-                  return ListTile(
-                    title: Text(
-                        '€${suggestion.suggestedPrice.toStringAsFixed(2)} by ${suggestion.userEmail}'),
-                    subtitle: Text('Votes: ${suggestion.votes}'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.thumb_up),
-                          onPressed: () => voteOnSuggestion(
-                              widget.pub.id, drinkId, suggestion.id, true),
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return FutureBuilder<List<PriceSuggestion>>(
+                future: FirestoreService()
+                    .getPriceSuggestions(widget.pub.id, drinkId),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError || snapshot.data == null) {
+                    print("Error fetching data: ${snapshot.error}");
+                    return const Center(
+                        child: Text(
+                            "Failed to load suggestions, please try again."));
+                  }
+                  var suggestions = snapshot.data!;
+                  if (suggestions.isEmpty) {
+                    return const Center(
+                        child: Text("No price suggestions available."));
+                  }
+                  return ListView.builder(
+                    itemCount: suggestions.length,
+                    itemBuilder: (context, index) {
+                      var suggestion = suggestions[index];
+                      return ListTile(
+                        title: Text(
+                            '€${suggestion.suggestedPrice.toStringAsFixed(2)} by ${suggestion.userEmail}'),
+                        subtitle: Text('Votes: ${suggestion.votes}'),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.thumb_up),
+                              onPressed: () async {
+                                await voteOnSuggestion(widget.pub.id, drinkId,
+                                    suggestion.id, true);
+                                setState(
+                                    () {}); // Trigger modal rebuild to update votes
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.thumb_down),
+                              onPressed: () async {
+                                await voteOnSuggestion(widget.pub.id, drinkId,
+                                    suggestion.id, false);
+                                setState(
+                                    () {}); // Trigger modal rebuild to update votes
+                              },
+                            ),
+                          ],
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.thumb_down),
-                          onPressed: () => voteOnSuggestion(
-                              widget.pub.id, drinkId, suggestion.id, false),
-                        ),
-                      ],
-                    ),
+                      );
+                    },
                   );
                 },
               );
@@ -317,8 +330,7 @@ class _PubDetailsPageState extends State<PubDetailsPage> {
 
       if (snapshot.docs.isNotEmpty) {
         return PriceSuggestion.fromMap(
-            snapshot.docs.first.data(),
-            snapshot.docs.first.id);
+            snapshot.docs.first.data(), snapshot.docs.first.id);
       }
       return null;
     } catch (e) {
