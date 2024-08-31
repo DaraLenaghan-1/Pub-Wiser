@@ -63,8 +63,4 @@ https://atlantictu-my.sharepoint.com/:v:/g/personal/g00385153_atu_ie/Ees7iZZLHmt
 
 Click the link below to watch the demo video:
 
-[Watch Demo Video](https://atlantictu-my.sharepoint.com/:v:/g/personal/g00385153_atu_ie/Ees7iZZLHmtIrfOMtqpz1awBS3YnH-cJ5wk9jL8sW0GQow?e=vgln3W)
-
-Alternatively, you can view the video by clicking on the thumbnail image below:
-
-[![Demo Video](https://img.youtube.com/vi/VIDEO_ID/maxresdefault.jpg)](https://atlantictu-my.sharepoint.com/:v:/g/personal/g00385153_atu_ie/Ees7iZZLHmtIrfOMtqpz1awBS3YnH-cJ5wk9jL8sW0GQow?e=vgln3W)
+[Watch Demo Video](https://atlantictu-my.sharepoint.com/:v:/r/personal/g00385153_atu_ie/Documents/24-08-31-14-41-34.mp4?csf=1&web=1&e=hgDLbd&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D)
