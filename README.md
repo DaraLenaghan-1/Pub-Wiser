@@ -59,4 +59,12 @@ For more information on Flutter development, visit the [official Flutter documen
 ## Demo video
 https://atlantictu-my.sharepoint.com/:v:/g/personal/g00385153_atu_ie/Ees7iZZLHmtIrfOMtqpz1awBS3YnH-cJ5wk9jL8sW0GQow?e=vgln3W
 
-<iframe src="https://atlantictu-my.sharepoint.com/personal/g00385153_atu_ie/_layouts/15/embed.aspx?UniqueId=32e6f9ab-aa47-4e2f-b42e-87386ea2d5ca&embed=%7B%22hvm%22%3Atrue%2C%22ust%22%3Atrue%7D&referrer=StreamWebApp&referrerScenario=EmbedDialog.Create" width="640" height="360" frameborder="0" scrolling="no" allowfullscreen title="24-08-31-14-41-34.mp4"></iframe>
+## Demo Video
+
+Click the link below to watch the demo video:
+
+[Watch Demo Video](https://atlantictu-my.sharepoint.com/:v:/g/personal/g00385153_atu_ie/Ees7iZZLHmtIrfOMtqpz1awBS3YnH-cJ5wk9jL8sW0GQow?e=vgln3W)
+
+Alternatively, you can view the video by clicking on the thumbnail image below:
+
+[![Demo Video](https://img.youtube.com/vi/VIDEO_ID/maxresdefault.jpg)](https://atlantictu-my.sharepoint.com/:v:/g/personal/g00385153_atu_ie/Ees7iZZLHmtIrfOMtqpz1awBS3YnH-cJ5wk9jL8sW0GQow?e=vgln3W)
